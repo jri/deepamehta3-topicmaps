@@ -1,0 +1,13 @@
+[
+	{
+		type_id: "Topicmap",
+	    fields: [
+	        {id: "Title",       model: {type: "text"}, view: {editor: "single line"}},
+	        {id: "Description", model: {type: "html"}, view: {editor: "multi line"}}
+	    ],
+	    view: {
+	        icon_src: "/de.deepamehta.3-topicmaps/images/network.png"
+	    },
+	    implementation: "PlainDocument"
+	}
+]

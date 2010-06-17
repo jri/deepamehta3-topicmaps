@@ -1,17 +1,6 @@
 function dm3_topicmaps() {
 
-    add_topic_type("Topicmap", {
-        fields: [
-            {id: "Title",       model: {type: "text"}, view: {editor: "single line"}, content: ""},
-            {id: "Description", model: {type: "html"}, view: {editor: "multi line"},  content: ""}
-        ],
-        view: {
-            icon_src: "vendor/dm3-topicmaps/images/network.png"
-        },
-        implementation: "PlainDocument"
-    })
-
-    css_stylesheet("vendor/dm3-topicmaps/style/dm3-topicmaps.css")
+    css_stylesheet("/de.deepamehta.3-topicmaps/style/dm3-topicmaps.css")
 
     var LOG_TOPICMAPS = false
 
@@ -149,7 +138,7 @@ function dm3_topicmaps() {
 
 
     function get_all_topicmaps() {
-        return get_topics_by_type("Topicmap")
+        return dms.get_topics("Topicmap")
     }
 
     /**
