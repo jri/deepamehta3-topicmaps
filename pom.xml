@@ -42,7 +42,7 @@
                             de.deepamehta.plugins.topicmaps.resources
                         </Export-Package>
                         <Private-Package>
-                            de.deepamehta.plugins.topicmaps
+                            de.deepamehta.plugins.topicmaps.*
                         </Private-Package>
                         <Bundle-Activator>de.deepamehta.plugins.topicmaps.TopicmapsPlugin</Bundle-Activator>
                     </instructions>

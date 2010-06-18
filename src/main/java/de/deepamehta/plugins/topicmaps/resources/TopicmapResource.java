@@ -1,5 +1,7 @@
 package de.deepamehta.plugins.topicmaps.resources;
 
+import de.deepamehta.plugins.topicmaps.model.Topicmap;
+
 import de.deepamehta.core.model.Topic;
 import de.deepamehta.core.plugin.DeepaMehtaPlugin;
 import de.deepamehta.core.service.DeepaMehtaService;
@@ -43,11 +45,15 @@ public class TopicmapResource {
     @GET
     @Path("/{id}")
     public JSONObject getTopicmap(@PathParam("id") long id) throws JSONException {
-        Topic t = dms.getTopic(15);
-        JSONObject o = new JSONObject();
-        o.put("message", "Hello Topicmaps Plugin!");
-        o.put("param", id);
-        o.put("topic", t.toJSON());
-        return o;
+        return new Topicmap(id, dms).toJSON();
     }
+
+
+
+    // ***********************
+    // *** Private Helpers ***
+    // ***********************
+
+
+
 }

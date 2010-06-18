@@ -17,6 +17,11 @@ function dm3_topicmaps() {
 
     this.init = function() {
 
+        // extend the REST client
+        dms.get_topicmap = function(topicmap_id) {
+            return this.request("GET", "/topicmap/" + topicmap_id)
+        }
+
         var topicmaps = get_all_topicmaps()
         create_default_topicmap()
         create_topicmap_menu()
@@ -142,7 +147,7 @@ function dm3_topicmaps() {
     }
 
     /**
-     * Returns the ID of the currently selected topicmap.
+     * Returns the ID of the selected topicmap.
      */
     function get_topicmap_id() {
         return ui.menu_item("topicmap-menu").value
@@ -339,8 +344,18 @@ function dm3_topicmaps() {
 
         function load() {
 
-            load_topics()
-            load_relations()
+            var topicmap = dms.get_topicmap(topicmap_id)
+            // hash topics by ID
+            for (var i = 0, topic; topic = topicmap.topics[i]; i++) {
+                topics[topic.id] = topic
+            }
+            // hash relations by ID
+            for (var i = 0, relation; relation = topicmap.relations[i]; i++) {
+                relations[relation.id] = relation
+            }
+
+            // load_topics()
+            // load_relations()
 
             function load_topics() {
                 // Round 1: load topic references and init position
