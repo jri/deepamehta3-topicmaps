@@ -2,7 +2,7 @@ function dm3_topicmaps() {
 
     css_stylesheet("/de.deepamehta.3-topicmaps/style/dm3-topicmaps.css")
 
-    var LOG_TOPICMAPS = false
+    var LOG_TOPICMAPS = true
 
     var topicmaps = {}  // Loaded topicmaps (key: topicmap ID, value: Topicmap object)
     var topicmap        // Selected topicmap (Topicmap object)
@@ -245,7 +245,7 @@ function dm3_topicmaps() {
             var image_tracker = create_image_tracker(display_on_canvas)
             for (var id in topics) {
                 var topic = topics[id]
-                if (topic.visible) {
+                if (topic.visibility) {
                     image_tracker.add_type(topic.type)
                 }
             }
@@ -255,7 +255,7 @@ function dm3_topicmaps() {
                 canvas.clear()
                 for (var id in topics) {
                     var topic = topics[id]
-                    if (topic.visible) {
+                    if (topic.visibility) {
                         canvas.add_topic(topic.id, topic.type, topic.label, false, false, topic.x, topic.y)
                     }
                 }
@@ -272,19 +272,17 @@ function dm3_topicmaps() {
             if (!topic) {
                 if (LOG_TOPICMAPS) log("Adding topic " + id + " (\"" + label + "\") to topicmap " + topicmap_id)
                 // update DB
-                var ref_fields = {
-                    topic_pos: {x: x, y: y},
-                    topic_visible: true
-                }
-                var ref = create_relation("Topic Ref", topicmap_id, id, ref_fields)
+                var properties = {x: String(x), y: String(y), visibility: String(true)}     // FIXME: no-String
+                var ref = create_relation("TOPICMAP_TOPIC", topicmap_id, id, properties)
                 // update model
-                topics[id] = new Topic(id, type, label, x, y, true, ref._id)
-            } else if (!topic.visible) {
+                topics[id] = new Topic(id, type, label, x, y, true, ref.id)
+            } else if (!topic.visibility) {
                 if (LOG_TOPICMAPS) log("Showing topic " + id + " (\"" + topic.label + "\") on topicmap " + topicmap_id)
-                topic.set_visible(true)
+                topic.set_visibility(true)
                 return {x: topic.x, y: topic.y}
             } else {
-                if (LOG_TOPICMAPS) log("Topic " + id + " (\"" + label + "\") already visible in topicmap " + topicmap_id)
+                if (LOG_TOPICMAPS)
+                    log("Topic " + id + " (\"" + label + "\") already visible in topicmap " + topicmap_id)
             }
         }
 
@@ -302,20 +300,14 @@ function dm3_topicmaps() {
 
         this.move_topic = function(id, x, y) {
             var topic = topics[id]
-            // update DB
-            var ref = db.open(topic.ref_id)
-            ref.topic_pos = {x: x, y: y}
-            if (LOG_TOPICMAPS) log("Moving topic " + id + " (x=" + x + " y=" + y + ")")
-            save_document(ref)
-            // update model
-            topic.x = x
-            topic.y = y
+            if (LOG_TOPICMAPS) log("Moving topic " + id + " (\"" + topic.label + "\") to x=" + x + ", y=" + y)
+            topic.move_to(x, y)
         }
 
         this.hide_topic = function(id) {
             var topic = topics[id]
             if (LOG_TOPICMAPS) log("Hiding topic " + id + " (\"" + topic.label + "\") on topicmap " + topicmap_id)
-            topic.set_visible(false)
+            topic.set_visibility(false)
         }
 
         this.delete_topic = function(id) {
@@ -344,13 +336,24 @@ function dm3_topicmaps() {
 
         function load() {
 
+            if (LOG_TOPICMAPS) log("Loading topicmap " + topicmap_id)
+
             var topicmap = dms.get_topicmap(topicmap_id)
-            // hash topics by ID
+
+            if (LOG_TOPICMAPS) log("..... " + topicmap.topics.length + " topics")
+
+            // hash topics
             for (var i = 0, topic; topic = topicmap.topics[i]; i++) {
+                if (LOG_TOPICMAPS) log(".......... ID " + topic.id + ": type_id=\"" + topic.type_id + "\", label=\"" +
+                    topic.label + "\", x=" + topic.x + ", y=" + topic.y + ", visibility=" + topic.visibility)
                 topics[topic.id] = topic
             }
-            // hash relations by ID
+
+            if (LOG_TOPICMAPS) log("..... " + topicmap.relations.length + " relations")
+
+            // hash relations
             for (var i = 0, relation; relation = topicmap.relations[i]; i++) {
+                if (LOG_TOPICMAPS) log(".......... ID " + relation.id)
                 relations[relation.id] = relation
             }
 
@@ -403,27 +406,30 @@ function dm3_topicmaps() {
 
         /*** Model Classes ***/
 
-        function Topic(id, type, label, x, y, visible, ref_id) {
+        function Topic(id, type, label, x, y, visibility, ref_id) {
+
             this.id = id
             this.type = type
             this.label = label
             this.x = x
             this.y = y
-            this.visible = visible
-            this.ref_id = ref_id
+            this.visibility = visibility
+            this.ref_id = ref_id            // ID of the TOPICMAP_TOPIC relation that is used
+                                            // by the topicmap to reference this topic.
 
-            this.set_visible = function(visible) {
+            this.move_to = function(x, y) {
                 // update DB
-                var ref = db.open(this.ref_id)
-                if (ref) {
-                    ref.topic_visible = visible
-                    save_document(ref)
-                } else {
-                    if (LOG_TOPICMAPS) log("### ERROR at Topicmap.Topic.set_visible: Reference for topic " + this.id + " (\"" +
-                        this.label + "\") in topicmap " + topicmap_id + " not found in DB (visible=" + visible + ").")
-                }
+                dms.set_relation_properties(ref_id, {x: String(x), y: String(y)})       // FIXME: no-String
                 // update model
-                this.visible = visible
+                this.x = x
+                this.y = y
+            }
+
+            this.set_visibility = function(visibility) {
+                // update DB
+                dms.set_relation_properties(ref_id, {visibility: String(visibility)})   // FIXME: no-String
+                // update model
+                this.visibility = visibility
             }
         }
 

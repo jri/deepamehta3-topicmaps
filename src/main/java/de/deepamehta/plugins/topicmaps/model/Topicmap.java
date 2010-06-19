@@ -10,6 +10,8 @@ import org.codehaus.jettison.json.JSONObject;
 import static java.util.Arrays.asList;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 
 
@@ -20,11 +22,17 @@ public class Topicmap {
 
     private DeepaMehtaService dms;
 
+    private Logger logger = Logger.getLogger(getClass().getName());
+
+    // ---
+
     public Topicmap(long id, DeepaMehtaService dms) {
         this.dms = dms;
+        logger.info("Loading topicmap " + id);
         List<RelatedTopic> relTopics = dms.getRelatedTopics(id, null, asList("TOPICMAP_TOPIC;INCOMING"), null);
         for (RelatedTopic relTopic : relTopics) {
-            addTopic(new TopicmapTopic(relTopic.getTopic()));
+            Map visualizationProperties = relTopic.getRelation().properties;
+            addTopic(new TopicmapTopic(relTopic.getTopic(), visualizationProperties));
         }
     }
 
