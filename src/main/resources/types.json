@@ -9,5 +9,12 @@
 	        icon_src: "/de.deepamehta.3-topicmaps/images/network.png"
 	    },
 	    implementation: "PlainDocument"
+	},
+	{
+		type_id: "Topicmap Relation Ref",
+	    fields: [
+	        {id: "relation_id", model: {type: "number"}}
+	    ],
+	    implementation: "PlainDocument"
 	}
 ]

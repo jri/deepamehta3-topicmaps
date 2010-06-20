@@ -48,6 +48,20 @@ public class TopicmapResource {
         return new Topicmap(id, dms).toJSON();
     }
 
+    @PUT
+    @Path("/{id}")
+    public JSONObject addItemToTopicmap(@PathParam("id") long id, JSONObject item) throws JSONException {
+        if (item.has("relation_id")) {
+            long relationId = item.getLong("relation_id");
+            long refTopicId = addRelationToTopicmap(relationId, id);
+            JSONObject response = new JSONObject();
+            response.put("ref_topic_id", refTopicId);
+            return response;
+        } else {
+            throw new IllegalArgumentException("item does not contain a relation reference");
+        }
+    }
+
 
 
     // ***********************
@@ -56,4 +70,12 @@ public class TopicmapResource {
 
 
 
+    private long addRelationToTopicmap(long relationId, long topicmapId) {
+        // TODO: do this in a transaction. Extend the core service to let the client begin a transaction.
+        Map properties = new HashMap();
+        properties.put("relation_id", relationId);
+        Topic refTopic = dms.createTopic("Topicmap Relation Ref", properties, null);
+        dms.createRelation("RELATION", topicmapId, refTopic.id, null);
+        return refTopic.id;
+    }
 }

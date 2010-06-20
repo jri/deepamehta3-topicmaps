@@ -1,6 +1,8 @@
 package de.deepamehta.plugins.topicmaps.model;
 
 import de.deepamehta.core.model.RelatedTopic;
+import de.deepamehta.core.model.Relation;
+import de.deepamehta.core.model.Topic;
 import de.deepamehta.core.service.DeepaMehtaService;
 
 import org.codehaus.jettison.json.JSONArray;
@@ -26,14 +28,12 @@ public class Topicmap {
 
     // ---
 
-    public Topicmap(long id, DeepaMehtaService dms) {
+    public Topicmap(long topicmapId, DeepaMehtaService dms) {
         this.dms = dms;
-        logger.info("Loading topicmap " + id);
-        List<RelatedTopic> relTopics = dms.getRelatedTopics(id, null, asList("TOPICMAP_TOPIC;INCOMING"), null);
-        for (RelatedTopic relTopic : relTopics) {
-            Map visualizationProperties = relTopic.getRelation().properties;
-            addTopic(new TopicmapTopic(relTopic.getTopic(), visualizationProperties));
-        }
+        logger.info("Loading topicmap " + topicmapId);
+        //
+        loadTopics(topicmapId);
+        loadRelations(topicmapId);
     }
 
     // ---
@@ -63,5 +63,25 @@ public class Topicmap {
         topicmap.put("topics", topics);
         topicmap.put("relations", relations);
         return topicmap;
+    }
+
+    // ---
+
+    private void loadTopics(long topicmapId) {
+        List<RelatedTopic> relTopics = dms.getRelatedTopics(topicmapId, null, asList("TOPICMAP_TOPIC;INCOMING"), null);
+        for (RelatedTopic relTopic : relTopics) {
+            Relation refRelation = relTopic.getRelation();
+            addTopic(new TopicmapTopic(relTopic.getTopic(), refRelation.properties, refRelation.id));
+        }
+    }
+
+    private void loadRelations(long topicmapId) {
+        List<RelatedTopic> relTopics = dms.getRelatedTopics(topicmapId, asList("Topicmap Relation Ref"),
+                                                                        asList("RELATION;INCOMING"), null);
+        for (RelatedTopic relTopic : relTopics) {
+            Topic refTopic = relTopic.getTopic();
+            long relationId = (Long) refTopic.getProperty("relation_id");
+            addRelation(new TopicmapRelation(dms.getRelation(relationId), refTopic.id));
+        }
     }
 }
