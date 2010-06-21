@@ -32,6 +32,9 @@ function dm3_topicmaps() {
             dms.add_relation_to_topicmap = function(relation_id, topicmap_id) {
                 return this.request("PUT", "/topicmap/" + topicmap_id, {relation_id: relation_id})
             }
+            dms.remove_relation_from_topicmap = function(relation_id, ref_id, topicmap_id) {
+                return this.request("DELETE", "/topicmap/" + topicmap_id, {relation_id: relation_id, ref_id: ref_id})
+            }
         }
 
         function create_default_topicmap() {
@@ -83,8 +86,11 @@ function dm3_topicmaps() {
         topicmap.add_relation(relation.id, relation.doc1_id, relation.doc2_id)
     }
 
-    this.post_hide_topic_from_canvas = function(topic_id) {
-        topicmap.hide_topic(topic_id)
+    /**
+     * @param   topic   a CanvasTopic object
+     */
+    this.post_hide_topic_from_canvas = function(topic) {
+        topicmap.hide_topic(topic.id)
     }
 
     /**
@@ -111,33 +117,34 @@ function dm3_topicmaps() {
         }
     }
 
-    this.post_delete = function(doc) {
-        if (doc.type == "Topic") {
-            // 1) Possibly remove topic from all topicmap models 
-            if (LOG_TOPICMAPS) log("Deleting topic " + doc._id + " from all topicmaps")
-            for (var id in topicmaps) {
-                topicmaps[id].delete_topic(doc._id)
-            }
-            // 2) Update the topicmap menu if the deleted topic was a topicmap
-            if (doc.topic_type == "Topicmap") {
-                // remove topicmap model
-                delete topicmaps[doc._id]
-                //
-                var topicmap_id = get_topicmap_id()
-                if (topicmap_id == doc._id) {
-                    if (LOG_TOPICMAPS) log("... updating the topicmap menu and selecting the first item " +
-                        "(the deleted topic was the CURRENT topicmap)")
-                    if (!size(topicmaps)) {
-                        create_topicmap("untitled")
-                    }
-                    update_topicmap_menu()
-                    select_topicmap(get_topicmap_id())
-                } else {
-                    if (LOG_TOPICMAPS) log("... updating the topicmap menu and restoring the selection " +
-                        "(the deleted topic was ANOTHER topicmap)")
-                    update_topicmap_menu()
-                    select_menu_item(topicmap_id)  // restore selection
+    /**
+     * @param   topic   a Topic object
+     */
+    this.post_delete_topic = function(topic) {
+        // 1) Possibly remove topic from all topicmap models 
+        if (LOG_TOPICMAPS) log("Deleting topic " + topic.id + " from all topicmaps")
+        for (var id in topicmaps) {
+            topicmaps[id].delete_topic(topic.id)
+        }
+        // 2) Update the topicmap menu if the deleted topic was a topicmap
+        if (topic.type_id == "Topicmap") {
+            // remove topicmap model
+            delete topicmaps[topic.id]
+            //
+            var topicmap_id = get_topicmap_id()
+            if (topicmap_id == topic.id) {
+                if (LOG_TOPICMAPS) log("..... updating the topicmap menu and selecting the first item " +
+                    "(the deleted topic was the CURRENT topicmap)")
+                if (!size(topicmaps)) {
+                    create_topicmap("untitled")
                 }
+                update_topicmap_menu()
+                select_topicmap(get_topicmap_id())
+            } else {
+                if (LOG_TOPICMAPS) log("..... updating the topicmap menu and restoring the selection " +
+                    "(the deleted topic was ANOTHER topicmap)")
+                update_topicmap_menu()
+                select_menu_item(topicmap_id)  // restore selection
             }
         }
     }
@@ -242,8 +249,8 @@ function dm3_topicmaps() {
     function Topicmap(topicmap_id) {
 
         // Model
-        var topics = {}     // topics of this topicmap (key: topic ID, value: Topic object)
-        var relations = {}  // relations of this topicmap (key: relation ID, value: Relation object)
+        var topics = {}     // topics of this topicmap (key: topic ID, value: TopicmapTopic object)
+        var relations = {}  // relations of this topicmap (key: relation ID, value: TopicmapRelation object)
 
         load()
 
@@ -283,7 +290,7 @@ function dm3_topicmaps() {
                 var properties = {x: x, y: y, visibility: true}
                 var ref = create_relation("TOPICMAP_TOPIC", topicmap_id, id, properties)
                 // update model
-                topics[id] = new Topic(id, type, label, x, y, true, ref.id)
+                topics[id] = new TopicmapTopic(id, type, label, x, y, true, ref.id)
             } else if (!topic.visibility) {
                 if (LOG_TOPICMAPS) log("Showing topic " + id + " (\"" + topic.label + "\") on topicmap " + topicmap_id)
                 topic.set_visibility(true)
@@ -300,7 +307,7 @@ function dm3_topicmaps() {
                 // update DB
                 var response = dms.add_relation_to_topicmap(id, topicmap_id)
                 // update model
-                relations[id] = new Relation(id, doc1_id, doc2_id, response.ref_topic_id)
+                relations[id] = new TopicmapRelation(id, doc1_id, doc2_id, response.ref_topic_id)
             } else {
                 if (LOG_TOPICMAPS) log("Relation " + id + " already in topicmap " + topicmap_id)
             }
@@ -324,17 +331,10 @@ function dm3_topicmaps() {
         }
 
         this.remove_relation = function(id) {
-            // 1) update DB
             if (LOG_TOPICMAPS) log("Removing relation " + id + " from topicmap " + topicmap_id)
-            var ref = db.open(relations[id].ref_id)
-            if (ref) {
-                // delete relation reference
-                db.deleteDoc(ref)
-            } else {
-                if (LOG_TOPICMAPS) log("### ERROR at Topicmap.remove_relation: Reference for relation " + id +
-                    " in topicmap " + topicmap_id + " not found in DB.")
-            }
-            // 2) update model
+            // update DB
+            dms.remove_relation_from_topicmap(id, relations[id].ref_id, topicmap_id)
+            // update model
             delete relations[id]
         }
 
@@ -357,11 +357,11 @@ function dm3_topicmaps() {
             function load_topics() {
                 for (var i = 0, topic; topic = topicmap.topics[i]; i++) {
                     var vis = topic.visualization
-                    if (LOG_TOPICMAPS) log(".......... ID " + topic.id + ": type_id=\"" + topic.type_id + "\", label=\"" +
-                        topic.label + "\", x=" + vis.x + ", y=" + vis.y + ", visibility=" + vis.visibility +
-                        ", ref_id=" + topic.ref_id)
-                    topics[topic.id] = new Topic(topic.id, topic.type_id, topic.label, vis.x, vis.y, vis.visibility,
-                        topic.ref_id)
+                    if (LOG_TOPICMAPS) log(".......... ID " + topic.id + ": type_id=\"" + topic.type_id +
+                        "\", label=\"" + topic.label + "\", x=" + vis.x + ", y=" + vis.y + ", visibility=" +
+                        vis.visibility + ", ref_id=" + topic.ref_id)
+                    topics[topic.id] = new TopicmapTopic(topic.id, topic.type_id, topic.label, vis.x, vis.y,
+                        vis.visibility, topic.ref_id)
                 }
             }
 
@@ -369,15 +369,15 @@ function dm3_topicmaps() {
                 for (var i = 0, relation; relation = topicmap.relations[i]; i++) {
                     if (LOG_TOPICMAPS) log(".......... ID " + relation.id + ": src_topic_id=" + relation.src_topic_id +
                         ", dst_topic_id=" + relation.dst_topic_id + ", ref_id=" + relation.ref_id)
-                    relations[relation.id] = new Relation(relation.id, relation.src_topic_id, relation.dst_topic_id,
-                        relation.ref_id)
+                    relations[relation.id] = new TopicmapRelation(relation.id,
+                        relation.src_topic_id, relation.dst_topic_id, relation.ref_id)
                 }
             }
         }
 
         /*** Model Classes ***/
 
-        function Topic(id, type, label, x, y, visibility, ref_id) {
+        function TopicmapTopic(id, type, label, x, y, visibility, ref_id) {
 
             this.id = id
             this.type = type
@@ -404,7 +404,7 @@ function dm3_topicmaps() {
             }
         }
 
-        function Relation(id, doc1_id, doc2_id, ref_id) {
+        function TopicmapRelation(id, doc1_id, doc2_id, ref_id) {
             this.id = id
             this.doc1_id = doc1_id
             this.doc2_id = doc2_id

@@ -62,6 +62,17 @@ public class TopicmapResource {
         }
     }
 
+    @DELETE
+    @Path("/{id}")
+    public void removeItemFromTopicmap(@PathParam("id") long id, JSONObject item) throws JSONException {
+        if (item.has("relation_id")) {
+            long refTopicId = item.getLong("ref_id");
+            removeRelationFromTopicmap(refTopicId);
+        } else {
+            throw new IllegalArgumentException("item does not contain a relation reference");
+        }
+    }
+
 
 
     // ***********************
@@ -77,5 +88,12 @@ public class TopicmapResource {
         Topic refTopic = dms.createTopic("Topicmap Relation Ref", properties, null);
         dms.createRelation("RELATION", topicmapId, refTopic.id, null);
         return refTopic.id;
+    }
+
+    /**
+     * @param   refTopicId  ID of the "Topicmap Relation Ref" topic of the relation to remove.
+     */
+    private void removeRelationFromTopicmap(long refTopicId) {
+        dms.deleteTopic(refTopicId);
     }
 }
