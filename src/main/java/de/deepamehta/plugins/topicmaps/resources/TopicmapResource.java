@@ -3,8 +3,8 @@ package de.deepamehta.plugins.topicmaps.resources;
 import de.deepamehta.plugins.topicmaps.model.Topicmap;
 
 import de.deepamehta.core.model.Topic;
-import de.deepamehta.core.plugin.DeepaMehtaPlugin;
 import de.deepamehta.core.service.DeepaMehtaService;
+import de.deepamehta.core.service.Plugin;
 import de.deepamehta.core.util.JSONHelper;
 
 import org.codehaus.jettison.json.JSONArray;
@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 @Produces("application/json")
 public class TopicmapResource {
 
-    private DeepaMehtaService dms = DeepaMehtaPlugin.getService();
+    private DeepaMehtaService dms = Plugin.getService();
 
     private Logger logger = Logger.getLogger(getClass().getName());
 
