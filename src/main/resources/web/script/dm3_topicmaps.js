@@ -127,7 +127,7 @@ function dm3_topicmaps() {
             topicmaps[id].delete_topic(topic.id)
         }
         // 2) Update the topicmap menu if the deleted topic was a topicmap
-        if (topic.type_id == "Topicmap") {
+        if (topic.type_uri == "http://www.deepamehta.de/core/topictype/Topicmap") {
             // remove topicmap model
             delete topicmaps[topic.id]
             //
@@ -158,7 +158,7 @@ function dm3_topicmaps() {
 
 
     function get_all_topicmaps() {
-        return dmc.get_topics("Topicmap")
+        return dmc.get_topics("http://www.deepamehta.de/core/topictype/Topicmap")
     }
 
     /**
@@ -170,7 +170,8 @@ function dm3_topicmaps() {
 
     function create_topicmap(name) {
         if (LOG_TOPICMAPS) log("Creating topicmap \"" + name + "\"")
-        var topicmap = create_topic("Topicmap", {"Title": name})
+        var properties = {"http://www.deepamehta.de/core/property/Title": name}
+        var topicmap = create_topic("http://www.deepamehta.de/core/topictype/Topicmap", properties)
         if (LOG_TOPICMAPS) log("..... " + topicmap.id)
         return topicmap
     }
@@ -213,7 +214,7 @@ function dm3_topicmaps() {
         }
         // add menu items
         ui.empty_menu("topicmap-menu")
-        var icon_src = get_icon_src("Topicmap")
+        var icon_src = get_icon_src("http://www.deepamehta.de/core/topictype/Topicmap")
         for (var i = 0, topicmap; topicmap = topicmaps[i]; i++) {
             ui.add_menu_item("topicmap-menu", {label: topicmap.label, value: topicmap.id, icon: icon_src})
         }
@@ -363,10 +364,10 @@ function dm3_topicmaps() {
             function load_topics() {
                 for (var i = 0, topic; topic = topicmap.topics[i]; i++) {
                     var vis = topic.visualization
-                    if (LOG_TOPICMAPS) log(".......... ID " + topic.id + ": type_id=\"" + topic.type_id +
+                    if (LOG_TOPICMAPS) log(".......... ID " + topic.id + ": type_uri=\"" + topic.type_uri +
                         "\", label=\"" + topic.label + "\", x=" + vis.x + ", y=" + vis.y + ", visibility=" +
                         vis.visibility + ", ref_id=" + topic.ref_id)
-                    topics[topic.id] = new TopicmapTopic(topic.id, topic.type_id, topic.label, vis.x, vis.y,
+                    topics[topic.id] = new TopicmapTopic(topic.id, topic.type_uri, topic.label, vis.x, vis.y,
                         vis.visibility, topic.ref_id)
                 }
             }

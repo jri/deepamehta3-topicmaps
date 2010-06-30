@@ -1,20 +1,31 @@
 [
-	{
-		type_id: "Topicmap",
-	    fields: [
-	        {id: "Title",       model: {type: "text"}, view: {editor: "single line"}},
-	        {id: "Description", model: {type: "html"}, view: {editor: "multi line"}}
-	    ],
-	    view: {
-	        icon_src: "/de.deepamehta.3-topicmaps/images/network.png"
-	    },
-	    implementation: "PlainDocument"
-	},
-	{
-		type_id: "Topicmap Relation Ref",
-	    fields: [
-	        {id: "relation_id", model: {type: "number"}}
-	    ],
-	    implementation: "PlainDocument"
-	}
+    {
+        uri: "http://www.deepamehta.de/core/topictype/Topicmap",
+        fields: [
+            {
+                uri: "http://www.deepamehta.de/core/property/Title",
+                model: {type: "text"},
+                view: {label: "Title", editor: "single line"}
+            },
+            {
+                uri: "http://www.deepamehta.de/core/property/Description",
+                model: {type: "html"},
+                view: {label: "Description", editor: "multi line"}
+            }
+        ],
+        view: {label: "Topicmap", icon_src: "/de.deepamehta.3-topicmaps/images/network.png"},
+        implementation: "PlainDocument"
+    },
+    {
+        uri: "http://www.deepamehta.de/core/topictype/TopicmapRelationRef",
+        fields: [
+            {
+                uri: "http://www.deepamehta.de/core/property/RelationID",
+                model: {type: "number"},
+                view: {label: "Relation ID"}
+            }
+        ],
+        view: {label: "Topicmap Relation Ref"},
+        implementation: "PlainDocument"
+    }
 ]

@@ -24,9 +24,9 @@ public class TopicmapsPlugin extends Plugin {
 
     @Override
     public void providePropertiesHook(Topic topic) {
-        if (topic.typeId.equals("Topicmap Relation Ref")) {
-            Object relation_id = dms.getTopicProperty(topic.id, "relation_id");
-            topic.setProperty("relation_id", relation_id);
+        if (topic.typeUri.equals("http://www.deepamehta.de/core/topictype/TopicmapRelationRef")) {
+            Object relation_id = dms.getTopicProperty(topic.id, "http://www.deepamehta.de/core/property/RelationID");
+            topic.setProperty("http://www.deepamehta.de/core/property/RelationID", relation_id);
         }
     }
 
