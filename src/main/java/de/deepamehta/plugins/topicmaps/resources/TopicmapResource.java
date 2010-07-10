@@ -84,8 +84,8 @@ public class TopicmapResource {
     private long addRelationToTopicmap(long relationId, long topicmapId) {
         // TODO: do this in a transaction. Extend the core service to let the client begin a transaction.
         Map properties = new HashMap();
-        properties.put("http://www.deepamehta.de/core/property/RelationID", relationId);
-        Topic refTopic = dms.createTopic("http://www.deepamehta.de/core/topictype/TopicmapRelationRef",
+        properties.put("de/deepamehta/core/property/RelationID", relationId);
+        Topic refTopic = dms.createTopic("de/deepamehta/core/topictype/TopicmapRelationRef",
             properties, null);
         dms.createRelation("RELATION", topicmapId, refTopic.id, null);
         return refTopic.id;

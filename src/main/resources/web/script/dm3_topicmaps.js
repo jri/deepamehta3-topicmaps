@@ -127,7 +127,7 @@ function dm3_topicmaps() {
             topicmaps[id].delete_topic(topic.id)
         }
         // 2) Update the topicmap menu if the deleted topic was a topicmap
-        if (topic.type_uri == "http://www.deepamehta.de/core/topictype/Topicmap") {
+        if (topic.type_uri == "de/deepamehta/core/topictype/Topicmap") {
             // remove topicmap model
             delete topicmaps[topic.id]
             //
@@ -158,7 +158,7 @@ function dm3_topicmaps() {
 
 
     function get_all_topicmaps() {
-        return dmc.get_topics("http://www.deepamehta.de/core/topictype/Topicmap")
+        return dmc.get_topics("de/deepamehta/core/topictype/Topicmap")
     }
 
     /**
@@ -170,8 +170,8 @@ function dm3_topicmaps() {
 
     function create_topicmap(name) {
         if (LOG_TOPICMAPS) log("Creating topicmap \"" + name + "\"")
-        var properties = {"http://www.deepamehta.de/core/property/Title": name}
-        var topicmap = create_topic("http://www.deepamehta.de/core/topictype/Topicmap", properties)
+        var properties = {"de/deepamehta/core/property/Title": name}
+        var topicmap = create_topic("de/deepamehta/core/topictype/Topicmap", properties)
         if (LOG_TOPICMAPS) log("..... " + topicmap.id)
         return topicmap
     }
@@ -214,7 +214,7 @@ function dm3_topicmaps() {
         }
         // add menu items
         ui.empty_menu("topicmap-menu")
-        var icon_src = get_icon_src("http://www.deepamehta.de/core/topictype/Topicmap")
+        var icon_src = get_icon_src("de/deepamehta/core/topictype/Topicmap")
         for (var i = 0, topicmap; topicmap = topicmaps[i]; i++) {
             ui.add_menu_item("topicmap-menu", {label: topicmap.label, value: topicmap.id, icon: icon_src})
         }

@@ -1,14 +1,14 @@
 [
     {
-        uri: "http://www.deepamehta.de/core/topictype/Topicmap",
+        uri: "de/deepamehta/core/topictype/Topicmap",
         fields: [
             {
-                uri: "http://www.deepamehta.de/core/property/Title",
+                uri: "de/deepamehta/core/property/Title",
                 model: {type: "text"},
                 view: {label: "Title", editor: "single line"}
             },
             {
-                uri: "http://www.deepamehta.de/core/property/Description",
+                uri: "de/deepamehta/core/property/Description",
                 model: {type: "html"},
                 view: {label: "Description", editor: "multi line"}
             }
@@ -17,10 +17,10 @@
         implementation: "PlainDocument"
     },
     {
-        uri: "http://www.deepamehta.de/core/topictype/TopicmapRelationRef",
+        uri: "de/deepamehta/core/topictype/TopicmapRelationRef",
         fields: [
             {
-                uri: "http://www.deepamehta.de/core/property/RelationID",
+                uri: "de/deepamehta/core/property/RelationID",
                 model: {type: "number"},
                 view: {label: "Relation ID"}
             }

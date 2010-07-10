@@ -77,11 +77,11 @@ public class Topicmap {
 
     private void loadRelations(long topicmapId) {
         List<RelatedTopic> relTopics = dms.getRelatedTopics(topicmapId,
-            asList("http://www.deepamehta.de/core/topictype/TopicmapRelationRef"),
+            asList("de/deepamehta/core/topictype/TopicmapRelationRef"),
             asList("RELATION;INCOMING"), null);
         for (RelatedTopic relTopic : relTopics) {
             Topic refTopic = relTopic.getTopic();
-            long relationId = (Long) refTopic.getProperty("http://www.deepamehta.de/core/property/RelationID");
+            long relationId = (Long) refTopic.getProperty("de/deepamehta/core/property/RelationID");
             addRelation(new TopicmapRelation(dms.getRelation(relationId), refTopic.id));
         }
     }
