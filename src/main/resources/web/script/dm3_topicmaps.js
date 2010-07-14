@@ -29,6 +29,9 @@ function dm3_topicmaps() {
             dmc.get_topicmap = function(topicmap_id) {
                 return this.request("GET", "/topicmap/" + topicmap_id)
             }
+            dmc.add_topic_to_topicmap = function(topic_id, x, y, topicmap_id) {
+                return this.request("PUT", "/topicmap/" + topicmap_id, {topic_id: topic_id, x: x, y: y})
+            }
             dmc.add_relation_to_topicmap = function(relation_id, topicmap_id) {
                 return this.request("PUT", "/topicmap/" + topicmap_id, {relation_id: relation_id})
             }
@@ -294,10 +297,9 @@ function dm3_topicmaps() {
             if (!topic) {
                 if (LOG_TOPICMAPS) log("Adding topic " + id + " (\"" + label + "\") to topicmap " + topicmap_id)
                 // update DB
-                var properties = {x: x, y: y, visibility: true}
-                var ref = create_relation("TOPICMAP_TOPIC", topicmap_id, id, properties)
+                var response = dmc.add_topic_to_topicmap(id, x, y, topicmap_id)
                 // update model
-                topics[id] = new TopicmapTopic(id, type, label, x, y, true, ref.id)
+                topics[id] = new TopicmapTopic(id, type, label, x, y, true, response.ref_id)
             } else if (!topic.visibility) {
                 if (LOG_TOPICMAPS) log("Showing topic " + id + " (\"" + topic.label + "\") on topicmap " + topicmap_id)
                 topic.set_visibility(true)
@@ -314,7 +316,7 @@ function dm3_topicmaps() {
                 // update DB
                 var response = dmc.add_relation_to_topicmap(id, topicmap_id)
                 // update model
-                relations[id] = new TopicmapRelation(id, doc1_id, doc2_id, response.ref_topic_id)
+                relations[id] = new TopicmapRelation(id, doc1_id, doc2_id, response.ref_id)
             } else {
                 if (LOG_TOPICMAPS) log("Relation " + id + " already in topicmap " + topicmap_id)
             }

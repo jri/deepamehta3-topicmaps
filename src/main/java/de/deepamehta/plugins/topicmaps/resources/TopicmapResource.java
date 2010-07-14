@@ -3,6 +3,7 @@ package de.deepamehta.plugins.topicmaps.resources;
 import de.deepamehta.plugins.topicmaps.model.Topicmap;
 
 import de.deepamehta.core.model.Topic;
+import de.deepamehta.core.model.Relation;
 import de.deepamehta.core.service.DeepaMehtaService;
 import de.deepamehta.core.service.Plugin;
 import de.deepamehta.core.util.JSONHelper;
@@ -44,18 +45,26 @@ public class TopicmapResource {
 
     @GET
     @Path("/{id}")
-    public JSONObject getTopicmap(@PathParam("id") long id) throws JSONException {
-        return new Topicmap(id, dms).toJSON();
+    public JSONObject getTopicmap(@PathParam("id") long topicmapId) throws JSONException {
+        return new Topicmap(topicmapId, dms).toJSON();
     }
 
     @PUT
     @Path("/{id}")
-    public JSONObject addItemToTopicmap(@PathParam("id") long id, JSONObject item) throws JSONException {
-        if (item.has("relation_id")) {
-            long relationId = item.getLong("relation_id");
-            long refTopicId = addRelationToTopicmap(relationId, id);
+    public JSONObject addItemToTopicmap(@PathParam("id") long topicmapId, JSONObject item) throws JSONException {
+        if (item.has("topic_id")) {
+            long topicId = item.getLong("topic_id");
+            int x = item.getInt("x");
+            int y = item.getInt("y");
+            long refId = addTopicToTopicmap(topicId, x, y, topicmapId);
             JSONObject response = new JSONObject();
-            response.put("ref_topic_id", refTopicId);
+            response.put("ref_id", refId);
+            return response;
+        } else if (item.has("relation_id")) {
+            long relationId = item.getLong("relation_id");
+            long refId = addRelationToTopicmap(relationId, topicmapId);
+            JSONObject response = new JSONObject();
+            response.put("ref_id", refId);
             return response;
         } else {
             throw new IllegalArgumentException("item does not contain a relation reference");
@@ -64,7 +73,7 @@ public class TopicmapResource {
 
     @DELETE
     @Path("/{id}")
-    public void removeItemFromTopicmap(@PathParam("id") long id, JSONObject item) throws JSONException {
+    public void removeItemFromTopicmap(@PathParam("id") long topicmapId, JSONObject item) throws JSONException {
         if (item.has("relation_id")) {
             long refTopicId = item.getLong("ref_id");
             removeRelationFromTopicmap(refTopicId);
@@ -81,12 +90,20 @@ public class TopicmapResource {
 
 
 
+    private long addTopicToTopicmap(long topicId, int x, int y, long topicmapId) {
+        Map properties = new HashMap();
+        properties.put("x", x);
+        properties.put("y", y);
+        properties.put("visibility", true);
+        Relation refRel = dms.createRelation("TOPICMAP_TOPIC", topicmapId, topicId, properties);
+        return refRel.id;
+    }
+
     private long addRelationToTopicmap(long relationId, long topicmapId) {
-        // TODO: do this in a transaction. Extend the core service to let the client begin a transaction.
+        // TODO: do this in a transaction. Extend the core service to let the caller begin a transaction.
         Map properties = new HashMap();
         properties.put("de/deepamehta/core/property/RelationID", relationId);
-        Topic refTopic = dms.createTopic("de/deepamehta/core/topictype/TopicmapRelationRef",
-            properties, null);
+        Topic refTopic = dms.createTopic("de/deepamehta/core/topictype/TopicmapRelationRef", properties, null);
         dms.createRelation("RELATION", topicmapId, refTopic.id, null);
         return refTopic.id;
     }
