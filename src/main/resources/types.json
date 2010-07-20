@@ -3,14 +3,15 @@
         uri: "de/deepamehta/core/topictype/Topicmap",
         fields: [
             {
+                label: "Title",
                 uri: "de/deepamehta/core/property/Title",
-                model: {type: "text"},
-                view: {label: "Title", editor: "single line"}
+                data_type: "text",
+                editor: "single line"
             },
             {
+                label: "Description",
                 uri: "de/deepamehta/core/property/Description",
-                model: {type: "html"},
-                view: {label: "Description", editor: "multi line"}
+                data_type: "html"
             }
         ],
         view: {label: "Topicmap", icon_src: "/de.deepamehta.3-topicmaps/images/network.png"},
@@ -20,9 +21,9 @@
         uri: "de/deepamehta/core/topictype/TopicmapRelationRef",
         fields: [
             {
+                label: "Relation ID",
                 uri: "de/deepamehta/core/property/RelationID",
-                model: {type: "number"},
-                view: {label: "Relation ID"}
+                data_type: "number"
             }
         ],
         view: {label: "Topicmap Relation Ref"},
