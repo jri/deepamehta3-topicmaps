@@ -6,12 +6,14 @@
                 label: "Title",
                 uri: "de/deepamehta/core/property/Title",
                 data_type: "text",
-                editor: "single line"
+                editor: "single line",
+                renderer_class: TitleRenderer
             },
             {
                 label: "Description",
                 uri: "de/deepamehta/core/property/Description",
-                data_type: "html"
+                data_type: "html",
+                renderer_class: BodyTextRenderer
             }
         ],
         view: {label: "Topicmap", icon_src: "/de.deepamehta.3-topicmaps/images/network.png"},
