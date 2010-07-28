@@ -1,34 +1,35 @@
 [
     {
+        label: "Topicmap",
         uri: "de/deepamehta/core/topictype/Topicmap",
+        icon_src: "/de.deepamehta.3-topicmaps/images/network.png",
+        js_renderer_class: "PlainDocument",
         fields: [
             {
                 label: "Title",
                 uri: "de/deepamehta/core/property/Title",
                 data_type: "text",
                 editor: "single line",
-                renderer_class: TitleRenderer
+                js_renderer_class: TitleRenderer
             },
             {
                 label: "Description",
                 uri: "de/deepamehta/core/property/Description",
                 data_type: "html",
-                renderer_class: BodyTextRenderer
+                js_renderer_class: BodyTextRenderer
             }
-        ],
-        view: {label: "Topicmap", icon_src: "/de.deepamehta.3-topicmaps/images/network.png"},
-        implementation: "PlainDocument"
+        ]
     },
     {
+        label: "Topicmap Relation Ref",
         uri: "de/deepamehta/core/topictype/TopicmapRelationRef",
+        js_renderer_class: "PlainDocument",
         fields: [
             {
                 label: "Relation ID",
                 uri: "de/deepamehta/core/property/RelationID",
                 data_type: "number"
             }
-        ],
-        view: {label: "Topicmap Relation Ref"},
-        implementation: "PlainDocument"
+        ]
     }
 ]
