@@ -42,7 +42,7 @@ function dm3_topicmaps() {
 
         function create_default_topicmap() {
             if (!topicmaps.length) {
-                create_topicmap("untitled")
+                create_topicmap_topic("untitled")
                 topicmaps = get_all_topicmaps()
             }
         }
@@ -139,7 +139,7 @@ function dm3_topicmaps() {
                 if (LOG_TOPICMAPS) log("..... updating the topicmap menu and selecting the first item " +
                     "(the deleted topic was the CURRENT topicmap)")
                 if (!size(topicmaps)) {
-                    create_topicmap("untitled")
+                    create_topicmap_topic("untitled")
                 }
                 rebuild_topicmap_menu()
                 select_topicmap(get_topicmap_id())
@@ -150,6 +150,21 @@ function dm3_topicmaps() {
                 select_menu_item(topicmap_id)  // restore selection
             }
         }
+    }
+
+
+
+    /********************************************************************************************/
+    /**************************************** Public API ****************************************/
+    /********************************************************************************************/
+
+
+
+    /**
+     * Creates a topicmap with the given name, puts it in the topicmap menu, and selects it.
+     */
+    this.create_topicmap = function(name) {
+        create_topicmap(name)
     }
 
 
@@ -171,7 +186,17 @@ function dm3_topicmaps() {
         return ui.menu_item("topicmap-menu").value
     }
 
+    /**
+     * Creates a topicmap with the given name, puts it in the topicmap menu, and selects it.
+     */
     function create_topicmap(name) {
+        var topicmap_id = create_topicmap_topic(name).id
+        rebuild_topicmap_menu()
+        select_menu_item(topicmap_id)
+        select_topicmap(topicmap_id)
+    }
+
+    function create_topicmap_topic(name) {
         if (LOG_TOPICMAPS) log("Creating topicmap \"" + name + "\"")
         var properties = {"de/deepamehta/core/property/Title": name}
         var topicmap = create_topic("de/deepamehta/core/topictype/Topicmap", properties)
@@ -204,10 +229,7 @@ function dm3_topicmaps() {
     function do_create_topicmap() {
         $("#topicmap_dialog").dialog("close")
         var name = $("#topicmap_name").val()
-        var topicmap_id = create_topicmap(name).id
-        rebuild_topicmap_menu()
-        select_menu_item(topicmap_id)
-        select_topicmap(topicmap_id)
+        create_topicmap(name)
         return false
     }
 
