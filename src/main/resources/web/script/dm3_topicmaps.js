@@ -7,13 +7,7 @@ function dm3_topicmaps() {
     var topicmaps = {}  // Loaded topicmaps (key: topicmap ID, value: Topicmap object)
     var topicmap        // Selected topicmap (Topicmap object)
 
-
-
-    /**************************************************************************************************/
-    /**************************************** Overriding Hooks ****************************************/
-    /**************************************************************************************************/
-
-
+    // ------------------------------------------------------------------------------------------------ Overriding Hooks
 
     this.init = function() {
 
@@ -23,7 +17,7 @@ function dm3_topicmaps() {
         create_default_topicmap()
         create_topicmap_menu()
         create_topicmap_dialog()
-        load_topicmap()
+        select_topicmap()
 
         function extend_rest_client() {
             dmc.get_topicmap = function(topicmap_id) {
@@ -52,7 +46,7 @@ function dm3_topicmaps() {
             var topicmap_menu = $("<div>").attr("id", "topicmap-menu")
             var topicmap_form = $("<div>").attr("id", "topicmap-form").append(topicmap_label).append(topicmap_menu)
             $("#workspace-form").after(topicmap_form)   // TODO: make topicmaps plugin independant from workspace plugin
-            ui.menu("topicmap-menu", topicmap_selected)
+            ui.menu("topicmap-menu", do_topicmap_selected)
             rebuild_topicmap_menu(topicmaps)
         }
 
@@ -66,8 +60,14 @@ function dm3_topicmaps() {
                 title: "New Topicmap", buttons: {"OK": do_create_topicmap}})
         }
 
-        function load_topicmap() {
-            select_topicmap(get_topicmap_id())
+        function select_topicmap() {
+            if (location.search.match(/topicmap=(\d+)/)) {
+                var topicmap_id = RegExp.$1
+                select_menu_item(topicmap_id)
+            } else {
+                var topicmap_id = get_topicmap_id_from_menu()
+            }
+            display_topicmap(topicmap_id)
         }
     }
 
@@ -134,7 +134,7 @@ function dm3_topicmaps() {
             // remove topicmap model
             delete topicmaps[topic.id]
             //
-            var topicmap_id = get_topicmap_id()
+            var topicmap_id = get_topicmap_id_from_menu()
             if (topicmap_id == topic.id) {
                 if (LOG_TOPICMAPS) log("..... updating the topicmap menu and selecting the first item " +
                     "(the deleted topic was the CURRENT topicmap)")
@@ -142,7 +142,7 @@ function dm3_topicmaps() {
                     create_topicmap_topic("untitled")
                 }
                 rebuild_topicmap_menu()
-                select_topicmap(get_topicmap_id())
+                display_topicmap(get_topicmap_id_from_menu())
             } else {
                 if (LOG_TOPICMAPS) log("..... updating the topicmap menu and restoring the selection " +
                     "(the deleted topic was ANOTHER topicmap)")
@@ -152,13 +152,7 @@ function dm3_topicmaps() {
         }
     }
 
-
-
-    /********************************************************************************************/
-    /**************************************** Public API ****************************************/
-    /********************************************************************************************/
-
-
+    // ------------------------------------------------------------------------------------------------------ Public API
 
     /**
      * Creates a topicmap with the given name, puts it in the topicmap menu, and selects it.
@@ -167,22 +161,16 @@ function dm3_topicmaps() {
         create_topicmap(name)
     }
 
-
-
-    /************************************************************************************************/
-    /**************************************** Custom Methods ****************************************/
-    /************************************************************************************************/
-
-
+    // ------------------------------------------------------------------------------------------------- Private Methods
 
     function get_all_topicmaps() {
         return dmc.get_topics("de/deepamehta/core/topictype/Topicmap")
     }
 
     /**
-     * Returns the ID of the selected topicmap.
+     * Reads out the topicmap menu and returns the topicmap ID.
      */
-    function get_topicmap_id() {
+    function get_topicmap_id_from_menu() {
         return ui.menu_item("topicmap-menu").value
     }
 
@@ -193,7 +181,7 @@ function dm3_topicmaps() {
         var topicmap_id = create_topicmap_topic(name).id
         rebuild_topicmap_menu()
         select_menu_item(topicmap_id)
-        select_topicmap(topicmap_id)
+        display_topicmap(topicmap_id)
     }
 
     function create_topicmap_topic(name) {
@@ -205,18 +193,18 @@ function dm3_topicmaps() {
     }
 
     /**
-     * Invoked when the user selects a topicmap.
+     * Invoked when the user made a selection from the topicmap menu.
      */
-    function topicmap_selected(menu_item) {
+    function do_topicmap_selected(menu_item) {
         var topicmap_id = menu_item.value
         if (topicmap_id == "_new") {
             open_topicmap_dialog()
         } else {
-            select_topicmap(topicmap_id)
+            display_topicmap(topicmap_id)
         }
     }
 
-    function select_topicmap(topicmap_id) {
+    function display_topicmap(topicmap_id) {
         if (LOG_TOPICMAPS) log("Selecting topicmap " + topicmap_id)
         topicmap = get_topicmap(topicmap_id)
         topicmap.display_on_canvas()
@@ -248,7 +236,7 @@ function dm3_topicmaps() {
     }
 
     /**
-     * Selects a topicmap programmatically.
+     * Selects an item from the topicmap menu.
      */
     function select_menu_item(topicmap_id) {
         ui.select_menu_item("topicmap-menu", topicmap_id)
@@ -263,13 +251,7 @@ function dm3_topicmaps() {
         return topicmaps[id]
     }
 
-
-
-    /************************************/
-    /********** Custom Classes **********/
-    /************************************/
-
-
+    // ------------------------------------------------------------------------------------------------- Private Classes
 
     /**
      * An in-memory representation (model) of a persistent topicmap. There are methods for:
