@@ -4,7 +4,7 @@ function dm3_topicmaps() {
 
     var LOG_TOPICMAPS = false
 
-    var topicmaps = {}  // Loaded topicmaps (key: topicmap ID, value: Topicmap object)
+    var topicmaps = {}  // The topicmaps cache (key: topicmap ID, value: Topicmap object)
     var topicmap        // Selected topicmap (Topicmap object)
 
     // ------------------------------------------------------------------------------------------------ Overriding Hooks
@@ -17,7 +17,7 @@ function dm3_topicmaps() {
         create_default_topicmap()
         create_topicmap_menu()
         create_topicmap_dialog()
-        select_topicmap()
+        select_initial_topicmap()
 
         function extend_rest_client() {
             dmc.get_topicmap = function(topicmap_id) {
@@ -60,7 +60,7 @@ function dm3_topicmaps() {
                 title: "New Topicmap", buttons: {"OK": do_create_topicmap}})
         }
 
-        function select_topicmap() {
+        function select_initial_topicmap() {
             if (location.search.match(/topicmap=(\d+)/)) {
                 var topicmap_id = RegExp.$1
                 select_menu_item(topicmap_id)
@@ -155,10 +155,16 @@ function dm3_topicmaps() {
     // ------------------------------------------------------------------------------------------------------ Public API
 
     /**
-     * Creates a topicmap with the given name, puts it in the topicmap menu, and selects it.
+     * Creates a topicmap with the given name, puts it in the topicmap menu, and displays the topicmap.
+     *
+     * @return  the topicmap topic.
      */
     this.create_topicmap = function(name) {
-        create_topicmap(name)
+        return create_topicmap(name)
+    }
+
+    this.select_topicmap = function(topicmap_id) {
+        select_topicmap(topicmap_id)
     }
 
     // ------------------------------------------------------------------------------------------------- Private Methods
@@ -175,13 +181,15 @@ function dm3_topicmaps() {
     }
 
     /**
-     * Creates a topicmap with the given name, puts it in the topicmap menu, and selects it.
+     * Creates a topicmap with the given name, puts it in the topicmap menu, and displays the topicmap.
+     *
+     * @return  the topicmap topic.
      */
     function create_topicmap(name) {
-        var topicmap_id = create_topicmap_topic(name).id
+        var topicmap = create_topicmap_topic(name)
         rebuild_topicmap_menu()
-        select_menu_item(topicmap_id)
-        display_topicmap(topicmap_id)
+        select_topicmap(topicmap.id)
+        return topicmap
     }
 
     function create_topicmap_topic(name) {
@@ -204,6 +212,21 @@ function dm3_topicmaps() {
         }
     }
 
+    /**
+     * Selects a topicmap programmatically.
+     * The respective item from the topicmap menu is selected and the topicmap is displayed on the canvas.
+     */
+    function select_topicmap(topicmap_id) {
+        select_menu_item(topicmap_id)
+        display_topicmap(topicmap_id)
+    }
+
+    /**
+     * Displays a topicmap on the canvas.
+     * If not already in cache, the topicmap is loaded and put in the cache.
+     *
+     * Prerequisite: the topicmap is already selected in the topicmap menu. 
+     */
     function display_topicmap(topicmap_id) {
         if (LOG_TOPICMAPS) log("Selecting topicmap " + topicmap_id)
         topicmap = get_topicmap(topicmap_id)
@@ -242,13 +265,19 @@ function dm3_topicmaps() {
         ui.select_menu_item("topicmap-menu", topicmap_id)
     }
 
-    function get_topicmap(id) {
+    /**
+     * Possibly loads a topicmap from DB, and returns it.
+     *
+     * If already in cache, the cached topicmap is returned.
+     * If not already in cache, the topicmap is loaded from DB and put in the cache.
+     */
+    function get_topicmap(topicmap_id) {
         // load topicmap on-demand
-        if (!topicmaps[id]) {
-            topicmaps[id] = new Topicmap(id)
+        if (!topicmaps[topicmap_id]) {
+            topicmaps[topicmap_id] = new Topicmap(topicmap_id)
         }
         //
-        return topicmaps[id]
+        return topicmaps[topicmap_id]
     }
 
     // ------------------------------------------------------------------------------------------------- Private Classes

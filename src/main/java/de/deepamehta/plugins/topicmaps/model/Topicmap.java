@@ -19,16 +19,23 @@ import java.util.logging.Logger;
 
 public class Topicmap {
 
+    // ---------------------------------------------------------------------------------------------- Instance Variables
+
     private List<TopicmapTopic> topics = new ArrayList();
     private List<TopicmapRelation> relations = new ArrayList();
 
-    private DeepaMehtaService dms;
+    protected long topicmapId;
+    protected DeepaMehtaService dms;
 
     private Logger logger = Logger.getLogger(getClass().getName());
 
-    // ---
+    // ---------------------------------------------------------------------------------------------------- Constructors
 
+    /**
+     * Loads a topicmap from the DB.
+     */
     public Topicmap(long topicmapId, DeepaMehtaService dms) {
+        this.topicmapId = topicmapId;
         this.dms = dms;
         logger.info("Loading topicmap " + topicmapId);
         //
@@ -36,7 +43,7 @@ public class Topicmap {
         loadRelations(topicmapId);
     }
 
-    // ---
+    // -------------------------------------------------------------------------------------------------- Public Methods
 
     void addTopic(TopicmapTopic topic) {
         topics.add(topic);
@@ -65,7 +72,7 @@ public class Topicmap {
         return topicmap;
     }
 
-    // ---
+    // ------------------------------------------------------------------------------------------------- Private Methods
 
     private void loadTopics(long topicmapId) {
         List<RelatedTopic> relTopics = dms.getRelatedTopics(topicmapId, null, asList("TOPICMAP_TOPIC;INCOMING"), null);

@@ -5,7 +5,7 @@
     <name>DeepaMehta 3 Topicmaps</name>
     <groupId>de.deepamehta</groupId>
     <artifactId>deepamehta3-topicmaps</artifactId>
-    <version>0.4.1-SNAPSHOT</version>
+    <version>${topicmaps-version}</version>
     <packaging>bundle</packaging>
 
     <parent>
@@ -31,6 +31,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
+                            de.deepamehta.plugins.topicmaps.model,
                             de.deepamehta.plugins.topicmaps.resources
                         </Export-Package>
                         <Private-Package>
