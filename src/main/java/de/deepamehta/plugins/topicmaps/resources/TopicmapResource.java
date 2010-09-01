@@ -4,7 +4,7 @@ import de.deepamehta.plugins.topicmaps.model.Topicmap;
 
 import de.deepamehta.core.model.Topic;
 import de.deepamehta.core.model.Relation;
-import de.deepamehta.core.service.DeepaMehtaService;
+import de.deepamehta.core.service.CoreService;
 import de.deepamehta.core.service.Plugin;
 import de.deepamehta.core.util.JSONHelper;
 
@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 @Produces("application/json")
 public class TopicmapResource {
 
-    private DeepaMehtaService dms = Plugin.getService();
+    private CoreService dms = Plugin.getService();
 
     private Logger logger = Logger.getLogger(getClass().getName());
 

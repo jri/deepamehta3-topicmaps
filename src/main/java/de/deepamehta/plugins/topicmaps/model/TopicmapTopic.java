@@ -10,16 +10,28 @@ import java.util.Map;
 
 
 
+/**
+ * A topic as contained in a topicmap.
+ * That is a generic topic enriched by visualization properties ("x", "y", "visibility").
+ * <p>
+ * Note: the topic's own properties are not initialized.
+ */
 class TopicmapTopic extends Topic {
+
+    // ---------------------------------------------------------------------------------------------- Instance Variables
 
     private Map visualizationProperties;
     private long refId;
+
+    // ---------------------------------------------------------------------------------------------------- Constructors
 
     TopicmapTopic(Topic topic, Map visualizationProperties, long refId) {
         super(topic);
         this.visualizationProperties = visualizationProperties;
         this.refId = refId;
     }
+
+    // -------------------------------------------------------------------------------------------------- Public Methods
 
     @Override
     public JSONObject toJSON() throws JSONException {
