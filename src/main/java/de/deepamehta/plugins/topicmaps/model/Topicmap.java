@@ -11,12 +11,20 @@ import org.codehaus.jettison.json.JSONObject;
 
 import static java.util.Arrays.asList;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
 
 
+/**
+ * An in-memory representation of a topicmap.
+ * That is a collection of topics and relations plus their visualization information.
+ * <p>
+ * The constructor loads the topicmap from the DB.
+ * There is a method to get a JSON representation of the topicmap.
+ */
 public class Topicmap {
 
     // ---------------------------------------------------------------------------------------------- Instance Variables
@@ -24,8 +32,8 @@ public class Topicmap {
     protected long topicmapId;
     protected CoreService dms;
 
-    private List<TopicmapTopic> topics = new ArrayList();
-    private List<TopicmapRelation> relations = new ArrayList();
+    private Map<Long, TopicmapTopic> topics = new HashMap();
+    private Map<Long, TopicmapRelation> relations = new HashMap();
 
     private Logger logger = Logger.getLogger(getClass().getName());
 
@@ -45,24 +53,24 @@ public class Topicmap {
 
     // -------------------------------------------------------------------------------------------------- Public Methods
 
-    void addTopic(TopicmapTopic topic) {
-        topics.add(topic);
+    public boolean containsTopic(long topicId) {
+        return topics.get(topicId) != null;
     }
 
-    void addRelation(TopicmapRelation relation) {
-        relations.add(relation);
+    public boolean containsRelation(long relationId) {
+        return relations.get(relationId) != null;
     }
 
     // ---
 
     public JSONObject toJSON() throws JSONException {
         JSONArray topics = new JSONArray();
-        for (TopicmapTopic topic : this.topics) {
+        for (TopicmapTopic topic : this.topics.values()) {
             topics.put(topic.toJSON());
         }
         //
         JSONArray relations = new JSONArray();
-        for (TopicmapRelation relation : this.relations) {
+        for (TopicmapRelation relation : this.relations.values()) {
             relations.put(relation.toJSON());
         }
         //
@@ -91,5 +99,15 @@ public class Topicmap {
             long relationId = (Long) refTopic.getProperty("de/deepamehta/core/property/RelationID");
             addRelation(new TopicmapRelation(dms.getRelation(relationId), refTopic.id));
         }
+    }
+
+    // ---
+
+    private void addTopic(TopicmapTopic topic) {
+        topics.put(topic.id, topic);
+    }
+
+    private void addRelation(TopicmapRelation relation) {
+        relations.put(relation.id, relation);
     }
 }

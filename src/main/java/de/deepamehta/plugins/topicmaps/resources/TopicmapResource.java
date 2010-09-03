@@ -1,5 +1,6 @@
 package de.deepamehta.plugins.topicmaps.resources;
 
+import de.deepamehta.plugins.topicmaps.TopicmapsPlugin;
 import de.deepamehta.plugins.topicmaps.model.Topicmap;
 
 import de.deepamehta.core.model.Topic;
@@ -40,6 +41,7 @@ import java.util.logging.Logger;
 public class TopicmapResource {
 
     private CoreService dms = Plugin.getService();
+    private TopicmapsPlugin plugin = (TopicmapsPlugin) dms.getPlugin("de.deepamehta.3-topicmaps");
 
     private Logger logger = Logger.getLogger(getClass().getName());
 
@@ -56,18 +58,22 @@ public class TopicmapResource {
             long topicId = item.getLong("topic_id");
             int x = item.getInt("x");
             int y = item.getInt("y");
-            long refId = addTopicToTopicmap(topicId, x, y, topicmapId);
+            //
+            long refId = plugin.addTopicToTopicmap(topicId, x, y, topicmapId);
+            //
             JSONObject response = new JSONObject();
             response.put("ref_id", refId);
             return response;
         } else if (item.has("relation_id")) {
             long relationId = item.getLong("relation_id");
-            long refId = addRelationToTopicmap(relationId, topicmapId);
+            //
+            long refId = plugin.addRelationToTopicmap(relationId, topicmapId);
+            //
             JSONObject response = new JSONObject();
             response.put("ref_id", refId);
             return response;
         } else {
-            throw new IllegalArgumentException("item does not contain a relation reference");
+            throw new IllegalArgumentException("item does not contain a topic or relation reference");
         }
     }
 
@@ -76,42 +82,9 @@ public class TopicmapResource {
     public void removeItemFromTopicmap(@PathParam("id") long topicmapId, JSONObject item) throws JSONException {
         if (item.has("relation_id")) {
             long refTopicId = item.getLong("ref_id");
-            removeRelationFromTopicmap(refTopicId);
+            plugin.removeRelationFromTopicmap(refTopicId);
         } else {
             throw new IllegalArgumentException("item does not contain a relation reference");
         }
-    }
-
-
-
-    // ***********************
-    // *** Private Helpers ***
-    // ***********************
-
-
-
-    private long addTopicToTopicmap(long topicId, int x, int y, long topicmapId) {
-        Map properties = new HashMap();
-        properties.put("x", x);
-        properties.put("y", y);
-        properties.put("visibility", true);
-        Relation refRel = dms.createRelation("TOPICMAP_TOPIC", topicmapId, topicId, properties);
-        return refRel.id;
-    }
-
-    private long addRelationToTopicmap(long relationId, long topicmapId) {
-        // TODO: do this in a transaction. Extend the core service to let the caller begin a transaction.
-        Map properties = new HashMap();
-        properties.put("de/deepamehta/core/property/RelationID", relationId);
-        Topic refTopic = dms.createTopic("de/deepamehta/core/topictype/TopicmapRelationRef", properties, null);
-        dms.createRelation("RELATION", topicmapId, refTopic.id, null);
-        return refTopic.id;
-    }
-
-    /**
-     * @param   refTopicId  ID of the "Topicmap Relation Ref" topic of the relation to remove.
-     */
-    private void removeRelationFromTopicmap(long refTopicId) {
-        dms.deleteTopic(refTopicId);
     }
 }

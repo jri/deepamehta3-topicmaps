@@ -8,14 +8,23 @@ import org.codehaus.jettison.json.JSONObject;
 
 
 
+/**
+ * A relation as contained in a topicmap.
+ */
 class TopicmapRelation extends Relation {
 
+    // ---------------------------------------------------------------------------------------------- Instance Variables
+
     private long refId;
+
+    // ---------------------------------------------------------------------------------------------------- Constructors
 
     TopicmapRelation(Relation relation, long refId) {
         super(relation);
         this.refId = refId;
     }
+
+    // -------------------------------------------------------------------------------------------------- Public Methods
 
     @Override
     public JSONObject toJSON() throws JSONException {
