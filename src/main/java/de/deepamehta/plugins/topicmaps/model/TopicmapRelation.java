@@ -11,7 +11,7 @@ import org.codehaus.jettison.json.JSONObject;
 /**
  * A relation as contained in a topicmap.
  */
-class TopicmapRelation extends Relation {
+public class TopicmapRelation extends Relation {
 
     // ---------------------------------------------------------------------------------------------- Instance Variables
 

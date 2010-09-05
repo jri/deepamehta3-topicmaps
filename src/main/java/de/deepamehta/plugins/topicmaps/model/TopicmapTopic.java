@@ -16,7 +16,7 @@ import java.util.Map;
  * <p>
  * Note: the topic's own properties are not initialized.
  */
-class TopicmapTopic extends Topic {
+public class TopicmapTopic extends Topic {
 
     // ---------------------------------------------------------------------------------------------- Instance Variables
 

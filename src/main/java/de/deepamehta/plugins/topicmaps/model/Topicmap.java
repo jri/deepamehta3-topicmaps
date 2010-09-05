@@ -32,8 +32,8 @@ public class Topicmap {
     protected long topicmapId;
     protected CoreService dms;
 
-    private Map<Long, TopicmapTopic> topics = new HashMap();
-    private Map<Long, TopicmapRelation> relations = new HashMap();
+    protected Map<Long, TopicmapTopic> topics = new HashMap();
+    protected Map<Long, TopicmapRelation> relations = new HashMap();
 
     private Logger logger = Logger.getLogger(getClass().getName());
 
