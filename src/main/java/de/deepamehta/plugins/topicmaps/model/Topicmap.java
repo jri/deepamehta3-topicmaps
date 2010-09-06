@@ -9,6 +9,8 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import java.awt.Point;
+
 import static java.util.Arrays.asList;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,6 +80,68 @@ public class Topicmap {
         topicmap.put("topics", topics);
         topicmap.put("relations", relations);
         return topicmap;
+    }
+
+    // -------------------------------------------------------------------------------------------- Public Inner Classes
+
+    // Note: there is a client-side equivalent in canvas.js (deepamehta-client plugin)
+    public class GridPositioning {
+
+        // Settings
+        private final int GRID_DIST_X = 180;           // 10em (see LABEL_MAX_WIDTH) + 20 pixel padding
+        private final int GRID_DIST_Y = 80;
+        private final int START_X;
+        private final int START_Y = 50;
+        private final int MIN_Y = -9999;
+
+        private final int canvasWidth;
+        private final int transX;
+
+        private int gridX;
+        private int gridY;
+
+        // --- Constructors ---
+
+        public GridPositioning(int canvasWidth, int transX) {
+            this.canvasWidth = canvasWidth;
+            this.transX = transX;
+            START_X = 50 - transX;
+            //
+            Point startPos = findStartPostition();
+            gridX = startPos.x;
+            gridY = startPos.y;
+        }
+
+        // --- Public Methods ---
+
+        public Point nextPosition() {
+            Point pos = new Point(gridX, gridY);
+            advancePosition();
+            return pos;
+        }
+
+        // --- Private Methods ---
+
+        private Point findStartPostition() {
+            int maxY = MIN_Y;
+            for (TopicmapTopic topic : topics.values()) {
+                if (topic.getY() > maxY) {
+                    maxY = topic.getY();
+                }
+            }
+            int x = START_X;
+            int y = maxY != MIN_Y ? maxY + GRID_DIST_Y : START_Y;
+            return new Point(x, y);
+        }
+
+        private void advancePosition() {
+            if (gridX + GRID_DIST_X + transX > canvasWidth) {
+                gridX = START_X;
+                gridY += GRID_DIST_Y;
+            } else {
+                gridX += GRID_DIST_X;
+            }
+        }
     }
 
     // ------------------------------------------------------------------------------------------------- Private Methods

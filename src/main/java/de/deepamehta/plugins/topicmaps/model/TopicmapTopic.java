@@ -40,4 +40,14 @@ public class TopicmapTopic extends Topic {
         o.put("ref_id", refId);
         return o;
     }
+
+    // ---
+
+    public int getX() {
+        return (Integer) visualizationProperties.get("x");
+    }
+
+    public int getY() {
+        return (Integer) visualizationProperties.get("y");
+    }
 }
