@@ -155,6 +155,13 @@ function dm3_topicmaps() {
     // ------------------------------------------------------------------------------------------------------ Public API
 
     /**
+     * @return  ID of the selected topicmap
+     */
+    this.get_topicmap_id = function() {
+        return topicmap.get_id()
+    }
+
+    /**
      * Creates a topicmap with the given name, puts it in the topicmap menu, and displays the topicmap.
      *
      * @return  the topicmap topic.
@@ -163,8 +170,22 @@ function dm3_topicmaps() {
         return create_topicmap(name)
     }
 
+    /**
+     * Selects a topicmap programmatically.
+     * The respective item from the topicmap menu is selected and the topicmap is displayed on the canvas.
+     */
     this.select_topicmap = function(topicmap_id) {
         select_topicmap(topicmap_id)
+    }
+
+    /**
+     * Reloads a topicmap from DB and displays it on the canvas.
+     *
+     * Prerequisite: the topicmap is already selected in the topicmap menu. 
+     */
+    this.refresh_topicmap = function(topicmap_id) {
+        delete topicmaps[topicmap_id]
+        display_topicmap(topicmap_id)
     }
 
     // ------------------------------------------------------------------------------------------------- Private Methods
@@ -266,7 +287,7 @@ function dm3_topicmaps() {
     }
 
     /**
-     * Possibly loads a topicmap from DB, and returns it.
+     * Loads a topicmap from DB, and returns it.
      *
      * If already in cache, the cached topicmap is returned.
      * If not already in cache, the topicmap is loaded from DB and put in the cache.
@@ -296,6 +317,12 @@ function dm3_topicmaps() {
         var relations = {}  // relations of this topicmap (key: relation ID, value: TopicmapRelation object)
 
         load()
+
+        // --- Public API ---
+
+        this.get_id = function() {
+            return topicmap_id
+        }
 
         this.display_on_canvas = function() {
 
@@ -384,6 +411,8 @@ function dm3_topicmaps() {
             return topics[id]
         }
 
+        // --- Private Methods ---
+
         function load() {
 
             if (LOG_TOPICMAPS) log("Loading topicmap " + topicmap_id)
@@ -417,7 +446,7 @@ function dm3_topicmaps() {
             }
         }
 
-        /*** Model Classes ***/
+        // --- Private Classes ---
 
         function TopicmapTopic(id, type, label, x, y, visibility, ref_id) {
 

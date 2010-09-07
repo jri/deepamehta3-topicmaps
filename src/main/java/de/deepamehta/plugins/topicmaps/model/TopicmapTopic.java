@@ -44,10 +44,16 @@ public class TopicmapTopic extends Topic {
     // ---
 
     public int getX() {
-        return (Integer) visualizationProperties.get("x");
+        // Note: coordinates can have both formats: double (through JavaScript) and integer (programmatically placed).
+        // TODO: store coordinates always as integers
+        Object x = visualizationProperties.get("x");
+        return x instanceof Double ? ((Double) x).intValue() : (Integer) x;
     }
 
     public int getY() {
-        return (Integer) visualizationProperties.get("y");
+        // Note: coordinates can have both formats: double (through JavaScript) and integer (programmatically placed).
+        // TODO: store coordinates always as integers
+        Object y = visualizationProperties.get("y");
+        return y instanceof Double ? ((Double) y).intValue() : (Integer) y;
     }
 }
