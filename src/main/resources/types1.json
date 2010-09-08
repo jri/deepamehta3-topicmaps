@@ -30,7 +30,8 @@
             {
                 label: "Relation ID",
                 uri: "de/deepamehta/core/property/RelationID",
-                data_type: "number"
+                data_type: "number",
+                indexing_mode: "KEY"
             }
         ]
     }

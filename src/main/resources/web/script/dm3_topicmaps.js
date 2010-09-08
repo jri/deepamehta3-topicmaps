@@ -99,8 +99,8 @@ function dm3_topicmaps() {
     /**
      * @param   relation   a CanvasAssoc object
      */
-    this.post_remove_relation_from_canvas = function(relation) {
-        topicmap.remove_relation(relation.id)
+    this.post_hide_relation_from_canvas = function(relation) {
+        topicmap.hide_relation(relation.id)
     }
 
     /**
@@ -124,7 +124,7 @@ function dm3_topicmaps() {
      * @param   topic   a Topic object
      */
     this.post_delete_topic = function(topic) {
-        // 1) Possibly remove topic from all topicmap models 
+        // 1) Remove topic from all topicmap models 
         if (LOG_TOPICMAPS) log("Deleting topic " + topic.id + " from all topicmaps")
         for (var id in topicmaps) {
             topicmaps[id].delete_topic(topic.id)
@@ -149,6 +149,14 @@ function dm3_topicmaps() {
                 rebuild_topicmap_menu()
                 select_menu_item(topicmap_id)  // restore selection
             }
+        }
+    }
+
+    this.post_delete_relation = function(relation_id) {
+        // Remove relation from all topicmap models 
+        if (LOG_TOPICMAPS) log("Deleting relation " + relation_id + " from all topicmaps")
+        for (var id in topicmaps) {
+            topicmaps[id].delete_relation(relation_id)
         }
     }
 
@@ -399,11 +407,14 @@ function dm3_topicmaps() {
             delete topics[id]
         }
 
-        this.remove_relation = function(id) {
+        this.hide_relation = function(id) {
             if (LOG_TOPICMAPS) log("Removing relation " + id + " from topicmap " + topicmap_id)
-            // update DB
-            dmc.remove_relation_from_topicmap(id, relations[id].ref_id, topicmap_id)
-            // update model
+            relations[id].remove()
+        }
+
+        this.delete_relation = function(id) {
+            if (LOG_TOPICMAPS) log("Removing relation " + id + " from topicmap " + topicmap_id +
+                " (part of delete operation)")
             delete relations[id]
         }
 
@@ -476,11 +487,19 @@ function dm3_topicmaps() {
         }
 
         function TopicmapRelation(id, doc1_id, doc2_id, ref_id) {
+
             this.id = id
             this.doc1_id = doc1_id
             this.doc2_id = doc2_id
             this.ref_id = ref_id            // ID of the "Topicmap Relation Ref" topic that is used
                                             // by the topicmap to reference this relation.
+
+            this.remove = function() {
+                // update DB
+                dmc.remove_relation_from_topicmap(id, ref_id, topicmap_id)
+                // update model
+                delete relations[id]
+            }
         }
     }
 }

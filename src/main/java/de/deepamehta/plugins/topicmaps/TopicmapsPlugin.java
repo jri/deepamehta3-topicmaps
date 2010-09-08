@@ -5,6 +5,7 @@ import de.deepamehta.core.model.Relation;
 import de.deepamehta.core.service.Plugin;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -25,6 +26,18 @@ public class TopicmapsPlugin extends Plugin {
     // ************************
 
 
+
+    @Override
+    public void postDeleteRelationHook(long relationId) {
+        // remove the relation from all topicmaps
+        List<Topic> refTopics = dms.getTopics("de/deepamehta/core/property/RelationID", relationId);
+        logger.info("### Removing relation " + relationId + " from " + refTopics.size() + " topicmaps");
+        for (Topic refTopic : refTopics) {
+            removeRelationFromTopicmap(refTopic.id);
+        }
+    }
+
+    // ---
 
     @Override
     public void providePropertiesHook(Topic topic) {
