@@ -1,6 +1,6 @@
 function dm3_topicmaps() {
 
-    css_stylesheet("/de.deepamehta.3-topicmaps/style/dm3-topicmaps.css")
+    dm3c.css_stylesheet("/de.deepamehta.3-topicmaps/style/dm3-topicmaps.css")
 
     var LOG_TOPICMAPS = false
 
@@ -20,16 +20,16 @@ function dm3_topicmaps() {
         select_initial_topicmap()
 
         function extend_rest_client() {
-            dmc.get_topicmap = function(topicmap_id) {
+            dm3c.restc.get_topicmap = function(topicmap_id) {
                 return this.request("GET", "/topicmap/" + topicmap_id)
             }
-            dmc.add_topic_to_topicmap = function(topic_id, x, y, topicmap_id) {
+            dm3c.restc.add_topic_to_topicmap = function(topic_id, x, y, topicmap_id) {
                 return this.request("PUT", "/topicmap/" + topicmap_id, {topic_id: topic_id, x: x, y: y})
             }
-            dmc.add_relation_to_topicmap = function(relation_id, topicmap_id) {
+            dm3c.restc.add_relation_to_topicmap = function(relation_id, topicmap_id) {
                 return this.request("PUT", "/topicmap/" + topicmap_id, {relation_id: relation_id})
             }
-            dmc.remove_relation_from_topicmap = function(relation_id, ref_id, topicmap_id) {
+            dm3c.restc.remove_relation_from_topicmap = function(relation_id, ref_id, topicmap_id) {
                 return this.request("DELETE", "/topicmap/" + topicmap_id, {relation_id: relation_id, ref_id: ref_id})
             }
         }
@@ -46,7 +46,7 @@ function dm3_topicmaps() {
             var topicmap_menu = $("<div>").attr("id", "topicmap-menu")
             var topicmap_form = $("<div>").attr("id", "topicmap-form").append(topicmap_label).append(topicmap_menu)
             $("#workspace-form").after(topicmap_form)   // TODO: make topicmaps plugin independant from workspace plugin
-            ui.menu("topicmap-menu", do_topicmap_selected)
+            dm3c.ui.menu("topicmap-menu", do_topicmap_selected)
             rebuild_topicmap_menu(topicmaps)
         }
 
@@ -111,7 +111,7 @@ function dm3_topicmaps() {
     }
 
     this.post_set_topic_label = function(topic_id, label) {
-        if (LOG_TOPICMAPS) log("Setting label of topic " + topic_id + " to \"" + label + "\"")
+        if (LOG_TOPICMAPS) dm3c.log("Setting label of topic " + topic_id + " to \"" + label + "\"")
         for (var id in topicmaps) {
             var topic = topicmaps[id].get_topic(topic_id)
             if (topic) {
@@ -125,7 +125,7 @@ function dm3_topicmaps() {
      */
     this.post_delete_topic = function(topic) {
         // 1) Remove topic from all topicmap models 
-        if (LOG_TOPICMAPS) log("Deleting topic " + topic.id + " from all topicmaps")
+        if (LOG_TOPICMAPS) dm3c.log("Deleting topic " + topic.id + " from all topicmaps")
         for (var id in topicmaps) {
             topicmaps[id].delete_topic(topic.id)
         }
@@ -136,15 +136,15 @@ function dm3_topicmaps() {
             //
             var topicmap_id = get_topicmap_id_from_menu()
             if (topicmap_id == topic.id) {
-                if (LOG_TOPICMAPS) log("..... updating the topicmap menu and selecting the first item " +
+                if (LOG_TOPICMAPS) dm3c.log("..... updating the topicmap menu and selecting the first item " +
                     "(the deleted topic was the CURRENT topicmap)")
-                if (!size(topicmaps)) {
+                if (!js.size(topicmaps)) {
                     create_topicmap_topic("untitled")
                 }
                 rebuild_topicmap_menu()
                 display_topicmap(get_topicmap_id_from_menu())
             } else {
-                if (LOG_TOPICMAPS) log("..... updating the topicmap menu and restoring the selection " +
+                if (LOG_TOPICMAPS) dm3c.log("..... updating the topicmap menu and restoring the selection " +
                     "(the deleted topic was ANOTHER topicmap)")
                 rebuild_topicmap_menu()
                 select_menu_item(topicmap_id)  // restore selection
@@ -154,7 +154,7 @@ function dm3_topicmaps() {
 
     this.post_delete_relation = function(relation_id) {
         // Remove relation from all topicmap models 
-        if (LOG_TOPICMAPS) log("Deleting relation " + relation_id + " from all topicmaps")
+        if (LOG_TOPICMAPS) dm3c.log("Deleting relation " + relation_id + " from all topicmaps")
         for (var id in topicmaps) {
             topicmaps[id].delete_relation(relation_id)
         }
@@ -196,17 +196,17 @@ function dm3_topicmaps() {
         display_topicmap(topicmap_id)
     }
 
-    // ------------------------------------------------------------------------------------------------- Private Methods
+    // ----------------------------------------------------------------------------------------------- Private Functions
 
     function get_all_topicmaps() {
-        return dmc.get_topics("de/deepamehta/core/topictype/Topicmap")
+        return dm3c.restc.get_topics("de/deepamehta/core/topictype/Topicmap")
     }
 
     /**
      * Reads out the topicmap menu and returns the topicmap ID.
      */
     function get_topicmap_id_from_menu() {
-        return ui.menu_item("topicmap-menu").value
+        return dm3c.ui.menu_item("topicmap-menu").value
     }
 
     /**
@@ -222,10 +222,10 @@ function dm3_topicmaps() {
     }
 
     function create_topicmap_topic(name) {
-        if (LOG_TOPICMAPS) log("Creating topicmap \"" + name + "\"")
+        if (LOG_TOPICMAPS) dm3c.log("Creating topicmap \"" + name + "\"")
         var properties = {"de/deepamehta/core/property/Title": name}
-        var topicmap = create_topic("de/deepamehta/core/topictype/Topicmap", properties)
-        if (LOG_TOPICMAPS) log("..... " + topicmap.id)
+        var topicmap = dm3c.create_topic("de/deepamehta/core/topictype/Topicmap", properties)
+        if (LOG_TOPICMAPS) dm3c.log("..... " + topicmap.id)
         return topicmap
     }
 
@@ -257,7 +257,7 @@ function dm3_topicmaps() {
      * Prerequisite: the topicmap is already selected in the topicmap menu. 
      */
     function display_topicmap(topicmap_id) {
-        if (LOG_TOPICMAPS) log("Selecting topicmap " + topicmap_id)
+        if (LOG_TOPICMAPS) dm3c.log("Selecting topicmap " + topicmap_id)
         topicmap = get_topicmap(topicmap_id)
         topicmap.display_on_canvas()
     }
@@ -278,20 +278,20 @@ function dm3_topicmaps() {
             topicmaps = get_all_topicmaps()
         }
         // add menu items
-        ui.empty_menu("topicmap-menu")
-        var icon_src = get_icon_src("de/deepamehta/core/topictype/Topicmap")
+        dm3c.ui.empty_menu("topicmap-menu")
+        var icon_src = dm3c.get_icon_src("de/deepamehta/core/topictype/Topicmap")
         for (var i = 0, topicmap; topicmap = topicmaps[i]; i++) {
-            ui.add_menu_item("topicmap-menu", {label: topicmap.label, value: topicmap.id, icon: icon_src})
+            dm3c.ui.add_menu_item("topicmap-menu", {label: topicmap.label, value: topicmap.id, icon: icon_src})
         }
-        ui.add_menu_separator("topicmap-menu")
-        ui.add_menu_item("topicmap-menu", {label: "New Topicmap...", value: "_new", is_trigger: true})
+        dm3c.ui.add_menu_separator("topicmap-menu")
+        dm3c.ui.add_menu_item("topicmap-menu", {label: "New Topicmap...", value: "_new", is_trigger: true})
     }
 
     /**
      * Selects an item from the topicmap menu.
      */
     function select_menu_item(topicmap_id) {
-        ui.select_menu_item("topicmap-menu", topicmap_id)
+        dm3c.ui.select_menu_item("topicmap-menu", topicmap_id)
     }
 
     /**
@@ -335,7 +335,7 @@ function dm3_topicmaps() {
         this.display_on_canvas = function() {
 
             // track loading of topic type images
-            var image_tracker = create_image_tracker(display_on_canvas)
+            var image_tracker = dm3c.create_image_tracker(display_on_canvas)
             for (var id in topics) {
                 var topic = topics[id]
                 if (topic.visibility) {
@@ -345,60 +345,61 @@ function dm3_topicmaps() {
             image_tracker.check()
 
             function display_on_canvas() {
-                canvas.clear()
+                dm3c.canvas.clear()
                 for (var id in topics) {
                     var topic = topics[id]
                     if (topic.visibility) {
-                        canvas.add_topic(topic.id, topic.type, topic.label, false, false, topic.x, topic.y)
+                        dm3c.canvas.add_topic(topic.id, topic.type, topic.label, false, false, topic.x, topic.y)
                     }
                 }
                 for (var id in relations) {
                     var rel = relations[id]
-                    canvas.add_relation(rel.id, rel.doc1_id, rel.doc2_id)
+                    dm3c.canvas.add_relation(rel.id, rel.doc1_id, rel.doc2_id)
                 }
-                canvas.refresh()
+                dm3c.canvas.refresh()
             }
         }
 
         this.show_topic = function(id, type, label, x, y) {
             var topic = topics[id]
             if (!topic) {
-                if (LOG_TOPICMAPS) log("Adding topic " + id + " (\"" + label + "\") to topicmap " + topicmap_id)
+                if (LOG_TOPICMAPS) dm3c.log("Adding topic " + id + " (\"" + label + "\") to topicmap " + topicmap_id)
                 // update DB
-                var response = dmc.add_topic_to_topicmap(id, x, y, topicmap_id)
+                var response = dm3c.restc.add_topic_to_topicmap(id, x, y, topicmap_id)
                 // update model
                 topics[id] = new TopicmapTopic(id, type, label, x, y, true, response.ref_id)
             } else if (!topic.visibility) {
-                if (LOG_TOPICMAPS) log("Showing topic " + id + " (\"" + topic.label + "\") on topicmap " + topicmap_id)
+                if (LOG_TOPICMAPS)
+                    dm3c.log("Showing topic " + id + " (\"" + topic.label + "\") on topicmap " + topicmap_id)
                 topic.set_visibility(true)
                 return {x: topic.x, y: topic.y}
             } else {
                 if (LOG_TOPICMAPS)
-                    log("Topic " + id + " (\"" + label + "\") already visible in topicmap " + topicmap_id)
+                    dm3c.log("Topic " + id + " (\"" + label + "\") already visible in topicmap " + topicmap_id)
             }
         }
 
         this.add_relation = function(id, doc1_id, doc2_id) {
             if (!relations[id]) {
-                if (LOG_TOPICMAPS) log("Adding relation " + id + " to topicmap " + topicmap_id)
+                if (LOG_TOPICMAPS) dm3c.log("Adding relation " + id + " to topicmap " + topicmap_id)
                 // update DB
-                var response = dmc.add_relation_to_topicmap(id, topicmap_id)
+                var response = dm3c.restc.add_relation_to_topicmap(id, topicmap_id)
                 // update model
                 relations[id] = new TopicmapRelation(id, doc1_id, doc2_id, response.ref_id)
             } else {
-                if (LOG_TOPICMAPS) log("Relation " + id + " already in topicmap " + topicmap_id)
+                if (LOG_TOPICMAPS) dm3c.log("Relation " + id + " already in topicmap " + topicmap_id)
             }
         }
 
         this.move_topic = function(id, x, y) {
             var topic = topics[id]
-            if (LOG_TOPICMAPS) log("Moving topic " + id + " (\"" + topic.label + "\") to x=" + x + ", y=" + y)
+            if (LOG_TOPICMAPS) dm3c.log("Moving topic " + id + " (\"" + topic.label + "\") to x=" + x + ", y=" + y)
             topic.move_to(x, y)
         }
 
         this.hide_topic = function(id) {
             var topic = topics[id]
-            if (LOG_TOPICMAPS) log("Hiding topic " + id + " (\"" + topic.label + "\") on topicmap " + topicmap_id)
+            if (LOG_TOPICMAPS) dm3c.log("Hiding topic " + id + " (\"" + topic.label + "\") on topicmap " + topicmap_id)
             topic.set_visibility(false)
         }
 
@@ -408,12 +409,12 @@ function dm3_topicmaps() {
         }
 
         this.hide_relation = function(id) {
-            if (LOG_TOPICMAPS) log("Removing relation " + id + " from topicmap " + topicmap_id)
+            if (LOG_TOPICMAPS) dm3c.log("Removing relation " + id + " from topicmap " + topicmap_id)
             relations[id].remove()
         }
 
         this.delete_relation = function(id) {
-            if (LOG_TOPICMAPS) log("Removing relation " + id + " from topicmap " + topicmap_id +
+            if (LOG_TOPICMAPS) dm3c.log("Removing relation " + id + " from topicmap " + topicmap_id +
                 " (part of delete operation)")
             delete relations[id]
         }
@@ -422,24 +423,24 @@ function dm3_topicmaps() {
             return topics[id]
         }
 
-        // --- Private Methods ---
+        // --- Private Functions ---
 
         function load() {
 
-            if (LOG_TOPICMAPS) log("Loading topicmap " + topicmap_id)
+            if (LOG_TOPICMAPS) dm3c.log("Loading topicmap " + topicmap_id)
 
-            var topicmap = dmc.get_topicmap(topicmap_id)
+            var topicmap = dm3c.restc.get_topicmap(topicmap_id)
 
-            if (LOG_TOPICMAPS) log("..... " + topicmap.topics.length + " topics")
+            if (LOG_TOPICMAPS) dm3c.log("..... " + topicmap.topics.length + " topics")
             load_topics()
 
-            if (LOG_TOPICMAPS) log("..... " + topicmap.relations.length + " relations")
+            if (LOG_TOPICMAPS) dm3c.log("..... " + topicmap.relations.length + " relations")
             load_relations()
 
             function load_topics() {
                 for (var i = 0, topic; topic = topicmap.topics[i]; i++) {
                     var vis = topic.visualization
-                    if (LOG_TOPICMAPS) log(".......... ID " + topic.id + ": type_uri=\"" + topic.type_uri +
+                    if (LOG_TOPICMAPS) dm3c.log(".......... ID " + topic.id + ": type_uri=\"" + topic.type_uri +
                         "\", label=\"" + topic.label + "\", x=" + vis.x + ", y=" + vis.y + ", visibility=" +
                         vis.visibility + ", ref_id=" + topic.ref_id)
                     topics[topic.id] = new TopicmapTopic(topic.id, topic.type_uri, topic.label, vis.x, vis.y,
@@ -449,7 +450,8 @@ function dm3_topicmaps() {
 
             function load_relations() {
                 for (var i = 0, relation; relation = topicmap.relations[i]; i++) {
-                    if (LOG_TOPICMAPS) log(".......... ID " + relation.id + ": src_topic_id=" + relation.src_topic_id +
+                    if (LOG_TOPICMAPS)
+                        dm3c.log(".......... ID " + relation.id + ": src_topic_id=" + relation.src_topic_id +
                         ", dst_topic_id=" + relation.dst_topic_id + ", ref_id=" + relation.ref_id)
                     relations[relation.id] = new TopicmapRelation(relation.id,
                         relation.src_topic_id, relation.dst_topic_id, relation.ref_id)
@@ -472,7 +474,7 @@ function dm3_topicmaps() {
 
             this.move_to = function(x, y) {
                 // update DB
-                dmc.set_relation_properties(ref_id, {x: x, y: y})
+                dm3c.restc.set_relation_properties(ref_id, {x: x, y: y})
                 // update model
                 this.x = x
                 this.y = y
@@ -480,7 +482,7 @@ function dm3_topicmaps() {
 
             this.set_visibility = function(visibility) {
                 // update DB
-                dmc.set_relation_properties(ref_id, {visibility: visibility})
+                dm3c.restc.set_relation_properties(ref_id, {visibility: visibility})
                 // update model
                 this.visibility = visibility
             }
@@ -496,7 +498,7 @@ function dm3_topicmaps() {
 
             this.remove = function() {
                 // update DB
-                dmc.remove_relation_from_topicmap(id, ref_id, topicmap_id)
+                dm3c.restc.remove_relation_from_topicmap(id, ref_id, topicmap_id)
                 // update model
                 delete relations[id]
             }
