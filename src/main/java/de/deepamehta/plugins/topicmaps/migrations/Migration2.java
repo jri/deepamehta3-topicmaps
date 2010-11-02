@@ -24,7 +24,8 @@ public class Migration2 extends Migration {
 
     @Override
     public void run() {
-        TopicType relRefType = dms.getTopicType("de/deepamehta/core/topictype/TopicmapRelationRef");
+        // clientContext=null
+        TopicType relRefType = dms.getTopicType("de/deepamehta/core/topictype/TopicmapRelationRef", null);
         DataField relIdField = relRefType.getDataField("de/deepamehta/core/property/RelationID");
         relIdField.setIndexingMode("KEY");
     }

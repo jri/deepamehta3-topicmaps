@@ -254,11 +254,13 @@ function dm3_topicmaps() {
      * Displays a topicmap on the canvas.
      * If not already in cache, the topicmap is loaded and put in the cache.
      *
+     * Updates global state: "topicmap", the selected topicmap.
+     *
      * Prerequisite: the topicmap is already selected in the topicmap menu. 
      */
     function display_topicmap(topicmap_id) {
         if (LOG_TOPICMAPS) dm3c.log("Selecting topicmap " + topicmap_id)
-        topicmap = get_topicmap(topicmap_id)
+        topicmap = get_topicmap(topicmap_id)    // update global state
         topicmap.display_on_canvas()
     }
 
