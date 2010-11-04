@@ -27,9 +27,13 @@ public class TopicmapRelation extends Relation {
     // -------------------------------------------------------------------------------------------------- Public Methods
 
     @Override
-    public JSONObject toJSON() throws JSONException {
-        JSONObject o = super.toJSON();
-        o.put("ref_id", refId);
-        return o;
+    public JSONObject toJSON() {
+        try {
+            JSONObject o = super.toJSON();
+            o.put("ref_id", refId);
+            return o;
+        } catch (JSONException e) {
+            throw new RuntimeException("Error while serializing " + this, e);
+        }
     }
 }

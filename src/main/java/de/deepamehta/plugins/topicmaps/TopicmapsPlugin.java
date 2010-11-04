@@ -51,7 +51,7 @@ public class TopicmapsPlugin extends Plugin {
     public void providePropertiesHook(Relation relation) {
         if (relation.typeId.equals("TOPICMAP_TOPIC")) {
             // transfer all relation properties
-            Map<String, Object> properties = dms.getRelation(relation.id).properties;
+            Map<String, Object> properties = dms.getRelation(relation.id).getProperties();
             for (String key : properties.keySet()) {
                 relation.setProperty(key, properties.get(key));
             }

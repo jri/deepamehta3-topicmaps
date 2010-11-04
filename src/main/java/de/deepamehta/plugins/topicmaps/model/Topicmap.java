@@ -150,7 +150,7 @@ public class Topicmap {
         List<RelatedTopic> relTopics = dms.getRelatedTopics(topicmapId, null, asList("TOPICMAP_TOPIC;INCOMING"), null);
         for (RelatedTopic relTopic : relTopics) {
             Relation refRelation = relTopic.getRelation();
-            addTopic(new TopicmapTopic(relTopic.getTopic(), refRelation.properties, refRelation.id));
+            addTopic(new TopicmapTopic(relTopic.getTopic(), refRelation.getProperties(), refRelation.id));
         }
     }
 
