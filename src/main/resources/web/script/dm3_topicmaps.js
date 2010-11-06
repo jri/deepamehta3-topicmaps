@@ -9,6 +9,14 @@ function dm3_topicmaps() {
 
     // ------------------------------------------------------------------------------------------------ Overriding Hooks
 
+
+
+    // *******************************
+    // *** Overriding Plugin Hooks ***
+    // *******************************
+
+
+
     this.init = function() {
 
         extend_rest_client()
@@ -46,8 +54,8 @@ function dm3_topicmaps() {
             var topicmap_menu = $("<div>").attr("id", "topicmap-menu")
             var topicmap_form = $("<div>").attr("id", "topicmap-form").append(topicmap_label).append(topicmap_menu)
             $("#workspace-form").after(topicmap_form)   // TODO: make topicmaps plugin independant from workspace plugin
-            dm3c.ui.menu("topicmap-menu", do_topicmap_selected)
-            rebuild_topicmap_menu(topicmaps)
+            dm3c.ui.menu("topicmap-menu", do_select_topicmap)
+            rebuild_topicmap_menu(undefined, topicmaps)
         }
 
         function create_topicmap_dialog() {
@@ -147,7 +155,6 @@ function dm3_topicmaps() {
                 if (LOG_TOPICMAPS) dm3c.log("..... updating the topicmap menu and restoring the selection " +
                     "(the deleted topic was ANOTHER topicmap)")
                 rebuild_topicmap_menu()
-                select_menu_item(topicmap_id)  // restore selection
             }
         }
     }
@@ -159,6 +166,24 @@ function dm3_topicmaps() {
             topicmaps[id].delete_relation(relation_id)
         }
     }
+
+
+
+    // ***************************************
+    // *** Overriding Access Control Hooks ***
+    // ***************************************
+
+
+
+    this.user_logged_in = function() {
+        rebuild_topicmap_menu()
+    }
+
+    this.user_logged_out = function() {
+        rebuild_topicmap_menu()
+    }
+
+
 
     // ------------------------------------------------------------------------------------------------------ Public API
 
@@ -204,23 +229,57 @@ function dm3_topicmaps() {
 
     /**
      * Reads out the topicmap menu and returns the topicmap ID.
+     * If the topicmap menu has no items yet, undefined is returned.
      */
     function get_topicmap_id_from_menu() {
-        return dm3c.ui.menu_item("topicmap-menu").value
+        var item = dm3c.ui.menu_item("topicmap-menu")
+        if (item) {
+            return item.value
+        }
+    }
+
+    function open_topicmap_dialog() {
+        $("#topicmap_dialog").dialog("open")
+    }
+
+    function do_create_topicmap() {
+        $("#topicmap_dialog").dialog("close")
+        var name = $("#topicmap_name").val()
+        create_topicmap(name)
+        return false
     }
 
     /**
+     * Invoked when the user made a selection from the topicmap menu.
+     */
+    function do_select_topicmap(menu_item) {
+        var topicmap_id = menu_item.value
+        if (topicmap_id == "_new") {
+            open_topicmap_dialog()
+        } else {
+            display_topicmap(topicmap_id)
+        }
+    }
+
+    // ---
+
+    /**
      * Creates a topicmap with the given name, puts it in the topicmap menu, and displays the topicmap.
+     *
+     * High-level method called from public API.
      *
      * @return  the topicmap topic.
      */
     function create_topicmap(name) {
         var topicmap = create_topicmap_topic(name)
-        rebuild_topicmap_menu()
-        select_topicmap(topicmap.id)
+        rebuild_topicmap_menu(topicmap.id)
+        display_topicmap(topicmap.id)
         return topicmap
     }
 
+    /**
+     * Creates a new empty topicmap in the DB.
+     */
     function create_topicmap_topic(name) {
         if (LOG_TOPICMAPS) dm3c.log("Creating topicmap \"" + name + "\"")
         var properties = {"de/deepamehta/core/property/Title": name}
@@ -230,20 +289,10 @@ function dm3_topicmaps() {
     }
 
     /**
-     * Invoked when the user made a selection from the topicmap menu.
-     */
-    function do_topicmap_selected(menu_item) {
-        var topicmap_id = menu_item.value
-        if (topicmap_id == "_new") {
-            open_topicmap_dialog()
-        } else {
-            display_topicmap(topicmap_id)
-        }
-    }
-
-    /**
      * Selects a topicmap programmatically.
      * The respective item from the topicmap menu is selected and the topicmap is displayed on the canvas.
+     *
+     * High-level method called from public API.
      */
     function select_topicmap(topicmap_id) {
         select_menu_item(topicmap_id)
@@ -264,29 +313,33 @@ function dm3_topicmaps() {
         topicmap.display_on_canvas()
     }
 
-    function open_topicmap_dialog() {
-        $("#topicmap_dialog").dialog("open")
-    }
+    // ---
 
-    function do_create_topicmap() {
-        $("#topicmap_dialog").dialog("close")
-        var name = $("#topicmap_name").val()
-        create_topicmap(name)
-        return false
-    }
-
-    function rebuild_topicmap_menu(topicmaps) {
+    /**
+     * @param   topicmap_id     Optional: ID of the topicmap to select.
+     *                          If not given, the current selection is maintained.
+     */
+    function rebuild_topicmap_menu(topicmap_id, topicmaps) {
+        if (!topicmap_id) {
+            topicmap_id = get_topicmap_id_from_menu()
+        }
         if (!topicmaps) {
             topicmaps = get_all_topicmaps()
         }
-        // add menu items
+        //
         dm3c.ui.empty_menu("topicmap-menu")
         var icon_src = dm3c.get_icon_src("de/deepamehta/core/topictype/Topicmap")
+        // add topicmaps to menu
         for (var i = 0, topicmap; topicmap = topicmaps[i]; i++) {
             dm3c.ui.add_menu_item("topicmap-menu", {label: topicmap.label, value: topicmap.id, icon: icon_src})
         }
-        dm3c.ui.add_menu_separator("topicmap-menu")
-        dm3c.ui.add_menu_item("topicmap-menu", {label: "New Topicmap...", value: "_new", is_trigger: true})
+        // add "New..." to menu
+        if (dm3c.has_create_permission("de/deepamehta/core/topictype/Topicmap")) {
+            dm3c.ui.add_menu_separator("topicmap-menu")
+            dm3c.ui.add_menu_item("topicmap-menu", {label: "New Topicmap...", value: "_new", is_trigger: true})
+        }
+        //
+        select_menu_item(topicmap_id)
     }
 
     /**
@@ -315,7 +368,7 @@ function dm3_topicmaps() {
 
     /**
      * An in-memory representation (model) of a persistent topicmap. There are methods for:
-     *  - loading a topicmap from DB and building the in-memory representation.
+     *  - building the in-memory representation by loading a topicmap from DB.
      *  - displaying the in-memory representation on the canvas.
      *  - manipulating the in-memory representation by e.g. adding/removing topics and relations,
      *    while synchronizing the DB accordingly.
