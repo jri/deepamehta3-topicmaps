@@ -12,7 +12,7 @@ function dm3_topicmaps() {
 
 
     // *******************************
-    // *** Overriding Plugin Hooks ***
+    // *** Overriding Client Hooks ***
     // *******************************
 
 
