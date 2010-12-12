@@ -1,4 +1,4 @@
-function dm3_topicmaps() {
+function topicmaps_plugin() {
 
     dm3c.css_stylesheet("/de.deepamehta.3-topicmaps/style/dm3-topicmaps.css")
 
@@ -175,7 +175,7 @@ function dm3_topicmaps() {
 
 
 
-    this.user_logged_in = function() {
+    this.user_logged_in = function(user) {
         rebuild_topicmap_menu()
     }
 
